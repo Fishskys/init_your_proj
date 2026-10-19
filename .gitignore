@@ -1,0 +1,38 @@
+# init_your_proj 自身
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+
+# --- 编辑器/系统垃圾文件 ---
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+.DS_Store
+Thumbs.db
+
+# --- 密钥文件（.env） ---
+.env
+.env.*
+!.env.example
+
+# --- 临时文件（tmp/temp） ---
+tmp/
+temp/
+*.tmp
+*.temp
+*.bak
+*.orig
+
+# --- 日志文件 ---
+*.log
+logs/
+npm-debug.log*
+yarn-error.log*
+yarn-debug.log*
+
+# --- init_your_proj ---
+init_your_proj.toml
+log/

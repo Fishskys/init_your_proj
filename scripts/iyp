@@ -1,0 +1,14 @@
+#!/usr/bin/env python3
+"""init_your_proj 入口（scripts 目录版）：允许从工具仓库内任意位置启动。"""
+import os
+import sys
+
+_HERE = os.path.dirname(os.path.abspath(__file__))
+_PARENT = os.path.dirname(_HERE)  # 工具仓库根
+for p in (_PARENT, _HERE):
+    if p not in sys.path:
+        sys.path.insert(0, p)
+from scripts.cli import main  # noqa: E402
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))
