@@ -81,19 +81,17 @@ iyp check --stage .           # 提交前卡点：只查本次暂存文件
 
 ### 用法二：pre-commit 框架（推荐）
 
-在用户项目的 `.pre-commit-config.yaml` 中加入（`repo` 换成实际 clone 位置；hook 的完整定义在工具仓库的 `.pre-commit-hooks.yaml` 清单里，用户侧与远程仓库一样只写三行）：
+在用户项目根创建 `.pre-commit-config.yaml`：
 
 ```yaml
 repos:
-  - repo: /path/to/init_your_proj
-    rev: v0.1.0                        # 须指向工具仓库真实存在的 tag
+  - repo: https://github.com/Fishskys/init_your_proj
+    rev: v0.1.0                        # 使用最新发布 tag
     hooks:
       - id: iyp-check
 ```
 
-> 如果没有把工具目录加入 PATH，在 hook 清单所在仓库外无法改 `entry`——直接用 `repo` 指向仓库内的 `iyp` 同级路径安装即可；或在本机 shell 配置 PATH 后使用上面的写法。
-
-安装：
+然后安装并生效：
 
 ```bash
 pip install pre-commit      # 或 pipx install pre-commit / brew install pre-commit
@@ -102,7 +100,8 @@ pre-commit install          # 在用户项目根执行，写入 .git/hooks/pre-c
 
 之后每次 `git commit` 自动执行 `iyp check --stage --strict`，命中阻断级问题返回非零退出码让 Git 取消提交。手动全量跑一遍：`pre-commit run --all-files`。
 
-`check --stage` 专为提交卡点设计：只查本次暂存文件、零交互、不修改文件、不写白名单，命中值默认脱敏。
+> hook 的完整定义在工具仓库的 `.pre-commit-hooks.yaml` 清单里（`entry: iyp check --stage --strict`、零交互、输出脱敏），用户侧只需写 `repo` / `rev` / `id` 三行；`rev` 须指向仓库真实存在的 tag。
+> `check --stage` 专为提交卡点设计：只查本次暂存文件、零交互、不修改文件、不写白名单，命中值默认脱敏。
 
 > 项目路径由用户指定：`iyp init .`、`iyp check /path/to/proj`；不填则使用当前工作目录。
 
