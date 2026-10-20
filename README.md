@@ -11,7 +11,7 @@
 - 🧠 **动态本机指纹**：运行时探测本机用户名、家目录、主机名、局域网 IP，生成精确匹配规则——换台机器依然有效，不会把文档里的举例误判成泄漏。
 - 🎯 **IP 白名单（CIDR）**：任意 IPv4 默认命中（公网也报）；回环/常见 DNS/探测到的本机 IP 在默认白名单，用户可追加（支持 `192.168.0.0/24` 网段）。
 - 📋 **白名单承载人工判定**：形状匹配的命中（如数据库连接串示例）改文字躲不开，正确做法是子串白名单；报告里写明了操作要点。
-- 📦 **零依赖零网络**：纯 Python 标准库，不访问任何外部服务，clone 到固定位置即可用。
+- 📦 **零依赖零网络**：纯 Python 标准库，不访问任何外部服务，clone 到固定位置即可用；支持 [pre-commit](https://pre-commit.com) 框架集成。
 
 ---
 
@@ -79,18 +79,33 @@ iyp check /path/to/my-proj    # 递归扫描目录下所有文本文件（默认
 iyp check --stage .           # 提交前卡点：只查本次暂存文件
 ```
 
-### 用法二：pre-commit 钩子（推荐）
+### 用法二：pre-commit 框架（推荐）
 
-在用户项目的 `.git/hooks/pre-commit` 中加入（路径换成实际安装位置）：
+在用户项目的 `.pre-commit-config.yaml` 中加入（`repo` 换成实际 clone 位置）：
 
-```sh
-#!/bin/sh
-/path/to/init_your_proj/iyp check --stage "$PWD" || exit 1
-# 若已加环境变量，直接：
-# iyp check --stage "$PWD" || exit 1
+```yaml
+repos:
+  - repo: /path/to/init_your_proj     # 本地仓库直接作为 hook 源（local 模式）
+    rev: v0.1.0                        # 本地路径模式下 rev 仅为占位
+    hooks:
+      - id: iyp-check
+        name: iyp check (sensitive info)
+        entry: iyp check --stage --strict   # 未加 PATH 则用绝对路径 /path/to/init_your_proj/iyp check --stage --strict
+        language: system
+        pass_filenames: false              # 扫描范围由 --stage 自行决定，不由框架传文件名
+        always_run: true
 ```
 
-`check --stage` 专为 pre-commit 设计：只查本次暂存文件、零交互、不修改文件、不写白名单，命中值默认脱敏，发现 `high`/`medium` 级问题时返回非零退出码让 Git 取消提交。
+安装：
+
+```bash
+pip install pre-commit      # 或 pipx install pre-commit / brew install pre-commit
+pre-commit install          # 在用户项目根执行，写入 .git/hooks/pre-commit
+```
+
+之后每次 `git commit` 自动执行 `iyp check --stage --strict`，命中阻断级问题返回非零退出码让 Git 取消提交。手动全量跑一遍：`pre-commit run --all-files`。
+
+`check --stage` 专为提交卡点设计：只查本次暂存文件、零交互、不修改文件、不写白名单，命中值默认脱敏。
 
 > 项目路径由用户指定：`iyp init .`、`iyp check /path/to/proj`；不填则使用当前工作目录。
 

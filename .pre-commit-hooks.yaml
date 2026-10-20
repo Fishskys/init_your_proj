@@ -1,0 +1,11 @@
+# init_your_proj 的 pre-commit 框架 hook 清单
+# 用法见 README「用法二：pre-commit 框架」——在用户项目 .pre-commit-config.yaml 中
+# 以本地路径（repo: /path/to/init_your_proj）引用本仓库，language: system 直接调用 iyp。
+- id: iyp-check
+  name: iyp check (sensitive info)
+  description: 提交前敏感信息检查——只查暂存文件，命中 high/medium/low 阻断提交（零交互、零修改、输出脱敏）
+  entry: iyp check --stage --strict
+  language: system
+  pass_filenames: false
+  always_run: true
+  stages: [pre-commit]
