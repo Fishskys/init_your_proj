@@ -81,20 +81,17 @@ iyp check --stage .           # 提交前卡点：只查本次暂存文件
 
 ### 用法二：pre-commit 框架（推荐）
 
-在用户项目的 `.pre-commit-config.yaml` 中加入（`repo` 换成实际 clone 位置）：
+在用户项目的 `.pre-commit-config.yaml` 中加入（`repo` 换成实际 clone 位置；hook 的完整定义在工具仓库的 `.pre-commit-hooks.yaml` 清单里，用户侧与远程仓库一样只写三行）：
 
 ```yaml
 repos:
-  - repo: /path/to/init_your_proj     # 本地仓库直接作为 hook 源（local 模式）
-    rev: v0.1.0                        # 本地路径模式下 rev 仅为占位
+  - repo: /path/to/init_your_proj
+    rev: v0.1.0                        # 须指向工具仓库真实存在的 tag
     hooks:
       - id: iyp-check
-        name: iyp check (sensitive info)
-        entry: iyp check --stage --strict   # 未加 PATH 则用绝对路径 /path/to/init_your_proj/iyp check --stage --strict
-        language: system
-        pass_filenames: false              # 扫描范围由 --stage 自行决定，不由框架传文件名
-        always_run: true
 ```
+
+> 如果没有把工具目录加入 PATH，在 hook 清单所在仓库外无法改 `entry`——直接用 `repo` 指向仓库内的 `iyp` 同级路径安装即可；或在本机 shell 配置 PATH 后使用上面的写法。
 
 安装：
 
