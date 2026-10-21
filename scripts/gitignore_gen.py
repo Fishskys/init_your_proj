@@ -3,7 +3,7 @@
 - 询问项目所有者所用语言/技术栈，按问答树拼装对应段落；
 - 默认段（编辑器垃圾 / 密钥文件 / 临时文件 / 日志文件）固定加入，不再询问；
 - AI agent 工具目录单独 y/n 询问（默认 N）；
-- 已有 .gitignore 则把新增行去重后追加（带工具标记注释），不覆盖；
+- 已有 .gitignore 则按分组合并：同名分组内补行，新分组带注释追加，不覆盖既有内容；
 - 段落模板内置在 SEGMENTS，扩展只需往里加条目。
 """
 from __future__ import annotations
@@ -43,8 +43,6 @@ SEGMENTS: dict[str, list[str]] = {
     "hermes_ai": [
         ".hermes/", ".claude/", ".cursor/", ".aider*", ".codex/",
     ],
-    # ---- 工具自身（clone 在用户项目里，默认排除）----
-    "init_your_proj": ["init_your_proj/", "init_your_proj/log/"],
 }
 
 LANG_LABELS = [
@@ -59,7 +57,7 @@ LANG_LABELS = [
     ("lua", "Lua"),
     ("ruby", "Ruby"),
 ]
-DEFAULT_KEYS = ["editor", "env", "tmp", "logs", "init_your_proj"]  # 固定加入，不询问
+DEFAULT_KEYS = ["editor", "env", "tmp", "logs"]  # 固定加入，不询问
 OPTIONAL_LABELS = [("hermes_ai", "AI agent 工具目录（.hermes/.claude/.cursor 等）")]
 LABELS: dict[str, str] = {k: k for k in SEGMENTS}
 LABELS.update({k: v for k, v in LANG_LABELS})
@@ -68,7 +66,6 @@ LABELS["editor"] = "编辑器/系统垃圾文件"
 LABELS["env"] = "密钥文件（.env）"
 LABELS["tmp"] = "临时文件（tmp/temp）"
 LABELS["logs"] = "日志文件"
-LABELS["init_your_proj"] = "init_your_proj 工具自身"
 
 
 def _menu(title: str, items: list[tuple[str, str]]) -> list[str]:

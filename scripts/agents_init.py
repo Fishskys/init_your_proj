@@ -2,9 +2,10 @@
 
 1. 项目路径由用户指定（iyp init . / iyp init /path/to/proj），不填则为当前目录；
 2. 把 templates/ 下模板复制到项目根：AGENTS_template.md→AGENTS.md、README_template.md→README.md；
-3. 交互式问答生成个性化 .gitignore（默认把 init_your_proj/ 加入）；
+3. 交互式问答生成个性化 .gitignore（固定四段 + 语言段 + 可选 AI agent 目录）；
 4. 未 git 初始化则 git init；
-5. 确保工具目录内有 init_your_proj.toml。
+5. 确保工具目录内有本机配置 init_your_proj.toml（首次自动生成）；
+   询问是否在用户项目根创建增量配置 init_your_proj.toml（默认 n，选 y 自动加入 .gitignore）。
 """
 from __future__ import annotations
 

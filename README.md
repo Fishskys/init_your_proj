@@ -116,7 +116,7 @@ pre-commit install          # 在用户项目根执行，写入 .git/hooks/pre-c
 1. 复制 `templates/` 下的模板到项目根：`AGENTS_template.md` → `AGENTS.md`、`README_template.md` → `README.md`（已存在时询问覆盖，默认 n）。
 2. 交互式问答生成个性化 `.gitignore`（已有则按分组去重追加：同名分组补行，新分组带注释追加，不覆盖原内容）：
    - 语言菜单：python / node / rust / go / java / c_cpp / dotnet / html_css / lua / ruby（默认不选）。
-   - 固定加入、不询问的五段：编辑器垃圾文件 / 密钥文件（.env）/ 临时文件（tmp、temp）/ 日志文件 / `init_your_proj/` 工具自身。
+   - 固定加入、不询问的四段：编辑器垃圾文件 / 密钥文件（.env）/ 临时文件（tmp、temp）/ 日志文件。
    - 单独询问：是否把 AI agent 工具目录加入（`.hermes/` 等，默认 n）。
 3. 检测项目是否已 git 初始化：没有则自动 `git init`。
 4. 询问是否在用户项目根创建 `init_your_proj.toml` 增量配置（默认 n）；选 y 会生成模板并自动加入 `.gitignore`。
@@ -164,7 +164,6 @@ pre-commit install          # 在用户项目根执行，写入 .git/hooks/pre-c
 | `[check].whitelist_files` | `[]` | 整文件跳过（相对路径，支持 fnmatch 通配）——**追加到默认** |
 | `[check].whitelist_strings` | `[]` | **子串白名单**：命中行包含任一字符串即不报——**追加到默认** |
 | `[check].ip_whitelist` | `[]` | 在默认（`127.0.0.1`/`0.0.0.0`/常见公共 DNS/探测到的本机局域网 IP）之外追加；支持 CIDR 网段（如 `192.168.0.0/24`） |
-| `[check].placeholder` | `<REDACTED:{name}>` | 覆盖默认占位符（当前版本 check 不做替换，预留给手动流程） |
 | `[check].skip_files` | `[]` | 额外按文件名跳过（锁文件等默认已跳过）——**追加到默认** |
 
 ### 增量配置示例
@@ -223,6 +222,7 @@ init_your_proj/
 ├── iyp                   # 可执行入口（仓库根与 scripts/ 各一份）
 ├── AGENTS.md             # 本仓库自身的协作准则（由 init 模板生成后按项目改写）
 ├── init_your_proj.toml   # 工具根本机配置（首次使用自动生成，已 gitignore）
+├── .pre-commit-hooks.yaml # pre-commit 框架 hook 清单（id: iyp-check）
 ├── templates/            # AGENTS.md / README.md 模板
 ├── scripts/
 │   ├── __main__.py       # 入口

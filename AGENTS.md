@@ -27,7 +27,7 @@
 │   ├── common.py            # IYP_HOME 定位、三层配置合并、IP CIDR 白名单、git/终端工具
 │   ├── defaults.py          # 默认关键词组 + 动态本机关键词（用户名/家目录/主机名/局域网 IP）
 │   ├── agents_init.py       # init 流程（确认路径 → 复制模板 → gitignore 问答 → git init → 配置）
-│   ├── gitignore_gen.py     # .gitignore 问答树（语言菜单 + 固定五段）
+│   ├── gitignore_gen.py     # .gitignore 问答树（语言菜单 + 固定四段）
 │   └── checker.py           # check 核心（dir/stage/git/tracked 四种范围 + 白名单 + 脱敏）
 ├── init_your_proj.toml      # 工具根本机配置（首次使用自动生成，已 gitignore）
 └── README.md

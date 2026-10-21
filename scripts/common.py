@@ -1,8 +1,7 @@
-"""通用工具：配置加载（项目根 init_your_proj.toml，两层合并）、git 操作、终端着色。"""
+"""通用工具：三层配置合并（内置默认 → 工具根 toml → 用户项目根 toml）、IP CIDR 白名单、git/终端。"""
 from __future__ import annotations
 
 import os
-import re
 import shutil
 import subprocess
 import sys
@@ -45,15 +44,6 @@ def die(msg: str, code: int = 1) -> None:
     sys.exit(code)
 
 
-def find_project_root(start: Path | None = None) -> Path:
-    """向上查找包含 .git 或 init_your_proj.toml 的目录。"""
-    cur = (start or Path.cwd()).resolve()
-    for p in (cur, *cur.parents):
-        if (p / CONFIG_NAME).exists() or (p / ".git").exists():
-            return p
-    return cur
-
-
 def run_git(args: list[str], cwd: Path, check: bool = True) -> subprocess.CompletedProcess:
     git = shutil.which("git") or "git"
     return subprocess.run(
@@ -64,22 +54,6 @@ def run_git(args: list[str], cwd: Path, check: bool = True) -> subprocess.Comple
 def is_git_repo(root: Path) -> bool:
     r = run_git(["rev-parse", "--is-inside-work-tree"], cwd=root, check=False)
     return r.returncode == 0 and r.stdout.strip() == "true"
-
-
-def tracked_files(root: Path) -> list[Path]:
-    """git ls-files 的结果（已天然与 gitignore 联动）。"""
-    r = run_git(["ls-files", "-z"], cwd=root, check=False)
-    if r.returncode != 0:
-        return []
-    out = []
-    for raw in r.stdout.split("\0"):
-        if not raw:
-            continue
-        p = (root / raw).resolve()
-        if p.is_file():
-            out.append(p)
-    return out
-
 
 
 # ---------------- 配置（初始默认由 defaults 生成；用户增量 = 项目根可选 init_your_proj.toml） ----------------
@@ -103,12 +77,9 @@ whitelist_files = []
 whitelist_strings = []
 # IP 白名单追加：在默认（127.0.0.1、常见公共 DNS、探测到的本机 IP）之外，再加你的网关/服务器 IP
 ip_whitelist = []
-# 默认占位符，{name} 会被替换为关键词组名
-placeholder = "<REDACTED:{name}>"
 # 额外跳过的文件名（锁文件等默认已跳过）
 skip_files = []
 '''
-
 
 def config_path(root: Path) -> Path:
     """用户增量配置 = 用户项目根目录下的 init_your_proj.toml（可选）。"""
@@ -146,7 +117,6 @@ def build_base_config() -> dict:
             "whitelist_files": [],
             "whitelist_strings": [],
             "ip_whitelist": list(DEFAULT_IP_WHITELIST),
-            "placeholder": "<REDACTED:{name}>",
             "skip_files": [],
         },
     }
@@ -157,8 +127,7 @@ def _merge_layer(base: dict, user: dict) -> dict:
 
     合并规则：
       - keywords.groups = 现有组（剔除 disable 名单）+ extra
-      - whitelist_files / whitelist_lines / ip_whitelist / skip_files = 追加去重
-      - placeholder 等标量 = 有写则覆盖
+      - whitelist_files / whitelist_strings / ip_whitelist / skip_files = 追加去重
     """
     uk = user.get("keywords", {})
     disabled = set(uk.get("disable", []))
@@ -176,8 +145,6 @@ def _merge_layer(base: dict, user: dict) -> dict:
         extra_vals = ck.get(key, [])
         if extra_vals:
             base["check"][key] = list(dict.fromkeys(base["check"][key] + list(extra_vals)))
-    if "placeholder" in ck:
-        base["check"]["placeholder"] = ck["placeholder"]
     return base
 
 
@@ -204,7 +171,7 @@ def load_config(root: Path) -> dict:
     合并语义：
       - 工具根 toml 是「全量落盘版」：若其 keywords.groups 非空，则**替换**内置组列表
         （用户可在此增删组）；check 白名单等追加。
-      - 用户根 toml 是「增量」：disable/extra/白名单追加、placeholder 覆盖。
+      - 用户根 toml 是「增量」：disable/extra/白名单追加。
     """
     cfg = build_base_config()
 
@@ -238,8 +205,6 @@ def _merge_check(cfg: dict, data: dict) -> None:
         extra_vals = ck.get(key, [])
         if extra_vals:
             cfg["check"][key] = list(dict.fromkeys(cfg["check"][key] + list(extra_vals)))
-    if "placeholder" in ck:
-        cfg["check"]["placeholder"] = ck["placeholder"]
 
 
 def tool_config_path() -> Path:
@@ -278,7 +243,6 @@ def ensure_tool_config() -> tuple[Path, bool]:
         "",
         "[check]",
         f"ip_whitelist = {json_list(DEFAULT_IP_WHITELIST)}",
-        'placeholder = "<REDACTED:{name}>"',
     ]
     path.write_text("\n".join(lines) + "\n", encoding="utf-8")
     return path, True

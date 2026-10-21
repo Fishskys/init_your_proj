@@ -1,10 +1,11 @@
-"""check 子命令：可扩展关键词扫描 + 交互/统一处理。
+"""check 子命令：零交互、零修改的敏感信息扫描。
 
-- 只扫描 git 跟踪文件（git ls-files，与 gitignore 天然联动）；
-- 关键词组可扩展：init_your_proj.toml 的 [keywords] disable/extra；
-- 命中列出文件:行号、命中行与相邻行（上下文各 1 行）；
-- 处理动作：redact（替换占位符）/ untrack（移出索引）/ delline（删行）/ skip；
-- 支持 --yes <action> 统一处理、-w 把命中行写入白名单（回写 init_your_proj.toml）。
+- 扫描范围四选一：--dir（默认，递归扫目录文本文件）/ --stage（暂存文件）/
+  --git（全部历史提交）/ --tracked（全部被跟踪文件）；
+- 关键词组来自三层配置合并（内置默认 → 工具根本机 toml → 用户项目根增量 toml）；
+- 命中输出 文件:行号 + 规则名 + 风险等级 + 命中值（默认脱敏，--raw 展示原文）；
+- 默认 high/medium 阻断（非零退出码），low 仅警告；--strict 时 low 也阻断；
+- 不改文件、不移除 git 跟踪、不写入白名单。
 """
 from __future__ import annotations
 
@@ -18,10 +19,9 @@ from .common import (
     BOLD, CYAN, DIM, GREEN, RED, YELLOW, c, die,
     is_git_repo, load_config, run_git, warn,
 )
-from .defaults import DEFAULT_SKIP_FILES, all_default_keywords
+from .defaults import DEFAULT_SKIP_FILES
 
 SEV_COLOR = {"high": RED, "medium": YELLOW, "low": DIM}
-ACTIONS = ("redact", "untrack", "delline", "skip")
 
 
 @dataclass

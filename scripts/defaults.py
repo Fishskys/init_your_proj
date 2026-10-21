@@ -1,7 +1,8 @@
-"""init_your_proj 默认配置（内置兜底）。
+"""init_your_proj 内置默认关键词组（三层配置的第一层）。
 
 用户侧配置文件为项目根目录的 init_your_proj.toml，结构见 README。
-此处只放 keyword check 的默认关键词组与默认动作，gitignore 问答树在 ignore.py 内。
+此处只放 keyword check 的默认关键词组、默认跳过文件名与 IP 白名单；
+.gitignore 问答树在 gitignore_gen.py 内。
 """
 
 # 每个关键词组: {name, pattern(正则), description, severity}
@@ -151,16 +152,6 @@ STATIC_KEYWORDS_TAIL = [
 def all_default_keywords() -> list[dict]:
     """静态默认组 + 运行时动态本机组（用户名/路径 + 本机 IP）。"""
     return DEFAULT_KEYWORDS + STATIC_KEYWORDS_TAIL + build_host_keywords() + build_local_ip_keywords()
-
-# 动作定义
-ACTIONS = {
-    "redact": "将命中内容替换为占位符 <REDACTED:name>",
-    "untrack": "将所在文件移出 git 索引（git rm --cached，保留本地文件）",
-    "delline": "删除命中行",
-    "skip": "仅跳过本次（可同时加入白名单）",
-}
-
-DEFAULT_PLACEHOLDER = "<REDACTED:{name}>"
 
 # 默认忽略的文件名（即使被 git 跟踪也跳过内容扫描，如锁文件）
 DEFAULT_SKIP_FILES = [
