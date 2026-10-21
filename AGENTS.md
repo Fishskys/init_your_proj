@@ -29,6 +29,7 @@
 │   ├── agents_init.py       # init 流程（确认路径 → 复制模板 → gitignore 问答 → git init → 配置）
 │   ├── gitignore_gen.py     # .gitignore 问答树（语言菜单 + 固定四段）
 │   └── checker.py           # check 核心（dir/stage/git/tracked 四种范围 + 白名单 + 脱敏）
+├── tests/                   # 全量回归测试（标准库 unittest，零依赖）+ run_tests.sh
 ├── init_your_proj.toml      # 工具根本机配置（首次使用自动生成，已 gitignore）
 └── README.md
 ```
@@ -102,6 +103,8 @@
 ```Plaintext
 [代码修改] ──> [类型检查/编译] ──> [单元测试] ──> [服务冷启动] ──> [集成/端到端验证]
 ```
+
+0. **测试命令**：`./run_tests.sh`（全量，零依赖 unittest）；提交前必须全绿。
 
 1. **静态检查与构建**：
 

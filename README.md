@@ -86,7 +86,7 @@ iyp check --stage .           # 提交前卡点：只查本次暂存文件
 ```yaml
 repos:
   - repo: https://github.com/Fishskys/init_your_proj
-    rev: v0.1.0                        # 使用最新发布 tag
+    rev: v0.1.1                        # 使用最新发布 tag
     hooks:
       - id: iyp-check
 ```
@@ -204,6 +204,23 @@ whitelist_strings = [
 
 ---
 
+## 🧪 测试
+
+零依赖，仅用标准库 `unittest`（无需安装 pytest）：
+
+```bash
+./run_tests.sh              # 全量
+./run_tests.sh -v           # 详细
+./run_tests.sh tests.test_checker   # 单个模块
+```
+
+覆盖：三层配置合并、`whitelist_strings`/`ip_whitelist`（含 CIDR）/`whitelist_files` 白名单、
+四种扫描范围（`--dir`/`--stage`/`--git`/`--tracked`）、`--strict` 与 `--raw`、
+git 历史真实行号、脱敏、二进制探测、.gitignore 分组追加（同名补行/新组注释/幂等）、
+init 全流程（含增量配置自动入 .gitignore）。
+
+---
+
 ## 🤝 参与贡献
 
 欢迎提交 Issue 与 Pull Request！
@@ -224,6 +241,8 @@ init_your_proj/
 ├── init_your_proj.toml   # 工具根本机配置（首次使用自动生成，已 gitignore）
 ├── .pre-commit-hooks.yaml # pre-commit 框架 hook 清单（id: iyp-check）
 ├── templates/            # AGENTS.md / README.md 模板
+├── tests/                # 全量回归测试（标准库 unittest，零依赖）
+├── run_tests.sh          # 测试入口
 ├── scripts/
 │   ├── __main__.py       # 入口
 │   ├── cli.py            # 子命令分发与 help（init / check）

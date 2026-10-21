@@ -149,8 +149,13 @@ def _merge_layer(base: dict, user: dict) -> dict:
 
 
 def _read_toml(path: Path) -> dict:
-    with open(path, "rb") as f:
-        return tomllib.load(f)
+    try:
+        with open(path, "rb") as f:
+            return tomllib.load(f)
+    except tomllib.TOMLDecodeError as e:
+        die(f"配置文件 TOML 语法错误: {path}\n  {e}")
+    except OSError as e:
+        die(f"配置文件读取失败: {path}\n  {e}")
 
 
 def json_list(items: list[str]) -> str:
@@ -207,9 +212,18 @@ def _merge_check(cfg: dict, data: dict) -> None:
             cfg["check"][key] = list(dict.fromkeys(cfg["check"][key] + list(extra_vals)))
 
 
+def _tool_root() -> Path:
+    """工具仓库根：优先 IYP_HOME（运行时可改），否则回退到包目录的父目录。"""
+    env = os.environ.get("IYP_HOME", "")
+    return Path(env) if env else PACKAGE_DIR.parent
+
+
 def tool_config_path() -> Path:
-    """本工具项目根的配置文件 = <工具仓库>/init_your_proj.toml（本机检测值落盘）。"""
-    return PROJECT_ROOT / CONFIG_NAME
+    """本工具项目根的配置文件 = <工具仓库>/init_your_proj.toml（本机检测值落盘）。
+
+    运行时读取 IYP_HOME（而非 import 时的模块常量），便于换安装位置或测试隔离。
+    """
+    return _tool_root() / CONFIG_NAME
 
 
 def ensure_tool_config() -> tuple[Path, bool]:

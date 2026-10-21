@@ -82,13 +82,21 @@ def is_probably_binary(path: Path) -> bool:
     return controls / len(text) > 0.05
 
 
+def _wl_file_match(rel: str, w: str) -> bool:
+    """白名单文件匹配：支持 fnmatch 通配、精确路径、以及目录前缀（"logs/" 匹配其下所有文件）。"""
+    if fnmatch.fnmatch(rel, w) or rel == w:
+        return True
+    d = w.rstrip("/")
+    return bool(d) and rel.startswith(d + "/")
+
+
 def scan(root: Path, cfg: dict, files: list[Path]) -> list[Hit]:
     patterns = build_patterns(cfg)
     if not patterns:
         warn("无可用关键词组：init_your_proj.toml 的 [[keywords.groups]] 为空或解析失败")
         return []
     skip_names = set(DEFAULT_SKIP_FILES) | set(cfg.get("check", {}).get("skip_files", []))
-    wl_files = [f.rstrip("/") for f in cfg.get("check", {}).get("whitelist_files", [])]
+    wl_files = [f for f in cfg.get("check", {}).get("whitelist_files", []) if f]
     wl_strings = [w for w in cfg.get("check", {}).get("whitelist_strings", []) if w]
     # IP 白名单：load_config 已合并默认（127.0.0.1/DNS/探测本机 IP）+ 用户增量
     from .common import ip_in_whitelist
@@ -99,7 +107,7 @@ def scan(root: Path, cfg: dict, files: list[Path]) -> list[Hit]:
     hits: list[Hit] = []
     for f in files:
         rel = f.relative_to(root).as_posix()
-        if any(fnmatch.fnmatch(rel, w) or rel == w for w in wl_files):
+        if any(_wl_file_match(rel, w) for w in wl_files):
             continue
         if f.name in skip_names:
             continue
@@ -258,6 +266,7 @@ def _scan_git_history(root: Path, cfg: dict) -> list[Hit]:
     ip_whitelist = set(cfg.get("check", {}).get("ip_whitelist", []))
     from .defaults import DEFAULT_SKIP_FILES
     skip_names = set(DEFAULT_SKIP_FILES) | set(cfg.get("check", {}).get("skip_files", []))
+    wl_files = [f for f in cfg.get("check", {}).get("whitelist_files", []) if f]
     import re as _re
     masked_re = _re.compile(r":[\s\"']*(\*\*\*+|<{1,2}[^>\s]{1,30}>{1,2}|x{4,}|\.{3,})@")
 
@@ -267,7 +276,8 @@ def _scan_git_history(root: Path, cfg: dict) -> list[Hit]:
     for raw in r.stdout.split("\n"):
         if raw.startswith("@@"):
             m = hunk_re.match(raw)
-            new_lineno = int(m.group(1)) if m else 0
+            # hunk 头的 +c 已是首行行号；下面每遇一条新文件行再 +1，故此处减 1
+            new_lineno = (int(m.group(1)) - 1) if m else 0
             continue
         if raw.startswith("+++ b/"):
             cur_file = raw[6:] or None
@@ -283,8 +293,9 @@ def _scan_git_history(root: Path, cfg: dict) -> list[Hit]:
         new_lineno += 1
         if cur_file is None:
             continue
-        fname = Path(cur_file).name
-        if fname in skip_names:
+        if Path(cur_file).name in skip_names:
+            continue
+        if any(_wl_file_match(cur_file, w) for w in wl_files):
             continue
         key = (cur_file, line.strip())
         if key in seen or any(w in line for w in wl_strings):
