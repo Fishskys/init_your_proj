@@ -105,22 +105,90 @@ def build_gitignore() -> str:
     return "\n".join(lines).rstrip() + "\n"
 
 
-def merge(existing: str, addition: str) -> tuple[str, int]:
-    """按行去重追加（忽略注释与空行比较）。返回 (新内容, 新增行数)。"""
-    have = {l.strip() for l in existing.splitlines()
-            if l.strip() and not l.strip().startswith("#")}
-    out = existing.rstrip("\n")
-    added = 0
+def _parse_segments(addition: str) -> list[tuple[str, list[str]]]:
+    """把 build_gitignore 的产物拆成分组列表 [(分组标签, 该组行), ...]。"""
+    segs: list[tuple[str, list[str]]] = []
+    cur_label: str | None = None
+    cur_lines: list[str] = []
     for line in addition.splitlines():
         s = line.strip()
-        if not s or s.startswith("#"):
+        if s.startswith("# --- ") and s.endswith(" ---"):
+            if cur_label is not None:
+                segs.append((cur_label, cur_lines))
+            cur_label = s[len("# --- "):-len(" ---")]
+            cur_lines = []
+        elif s.startswith("# ----"):      # 工具标记行，不作为分组
             continue
-        if s in have:
+        elif cur_label is not None and s:
+            cur_lines.append(line)
+    if cur_label is not None:
+        segs.append((cur_label, cur_lines))
+    return segs
+
+
+def merge(existing: str, addition: str) -> tuple[str, int]:
+    """按分组追加：同名 `# --- 分组 ---` 段内补行，缺段则整段带注释追加。
+
+    与旧实现（逐行裸追加、丢掉注释与空行）的区别：保留分组注释与空行结构，
+    使用户在已有 .gitignore 上追加时仍按语言/用途分段可读。
+    两阶段处理：① 先在原文件内补全同名分组（按行号倒序插入，避免偏移）；
+    ② 再把全新的分组带注释追加到末尾。
+    返回 (新内容, 新增行数)。
+    """
+    segs = _parse_segments(addition)
+    lines = existing.rstrip("\n").splitlines() if existing.strip() else []
+    have = {l.strip() for l in lines if l.strip() and not l.strip().startswith("#")}
+    added = 0
+
+    # ---- 阶段 1：定位原文件已有的分组头 ----
+    headers: dict[str, int] = {}
+    for i, l in enumerate(lines):
+        s = l.strip()
+        if s.startswith("# --- ") and s.endswith(" ---"):
+            headers.setdefault(s[len("# --- "):-len(" ---")], i)
+
+    same_group: list[tuple[int, list[str]]] = []   # (header 行号, 缺失行)
+    new_groups: list[tuple[str, list[str]]] = []
+    for label, seg_lines in segs:
+        missing = [l for l in seg_lines if l.strip() and l.strip() not in have]
+        if not missing:
             continue
-        have.add(s)
-        out += "\n" + line
-        added += 1
-    return out + "\n", added
+        for l in missing:
+            have.add(l.strip())
+        if label in headers:
+            same_group.append((headers[label], missing))
+        else:
+            new_groups.append((label, missing))
+
+    # ---- 阶段 1 执行：从后往前插入，行号不受影响 ----
+    HEAD = lambda s: s.strip().startswith("# --- ") and s.strip().endswith(" ---")
+    for idx, missing in sorted(same_group, key=lambda x: -x[0]):
+        end = len(lines)
+        for j in range(idx + 1, len(lines)):
+            if HEAD(lines[j]):
+                end = j
+                break
+        insert_at = end
+        while insert_at - 1 > idx and not lines[insert_at - 1].strip():
+            insert_at -= 1
+        for off, l in enumerate(missing):
+            lines.insert(insert_at + off, l)
+        added += len(missing)
+
+    # ---- 阶段 2：追加全新分组（整段带注释）----
+    for label, missing in new_groups:
+        if lines and lines[-1].strip():
+            lines.append("")
+        if MARK not in {l.strip() for l in lines}:
+            lines.append(MARK)
+            lines.append("")
+        lines.append(f"# --- {label} ---")
+        lines.extend(missing)
+        added += len(missing)
+
+    if added == 0:
+        return (existing if existing.endswith("\n") else existing + "\n"), 0
+    return "\n".join(lines).rstrip() + "\n", added
 
 
 def cmd_ignore_flow(root: Path) -> int:

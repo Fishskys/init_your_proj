@@ -114,7 +114,7 @@ pre-commit install          # 在用户项目根执行，写入 .git/hooks/pre-c
 项目路径由用户指定（`iyp init .`、`iyp init /path/to/proj`）；不填则使用当前工作目录。
 
 1. 复制 `templates/` 下的模板到项目根：`AGENTS_template.md` → `AGENTS.md`、`README_template.md` → `README.md`（已存在时询问覆盖，默认 n）。
-2. 交互式问答生成个性化 `.gitignore`（已有则去重追加）：
+2. 交互式问答生成个性化 `.gitignore`（已有则按分组去重追加：同名分组补行，新分组带注释追加，不覆盖原内容）：
    - 语言菜单：python / node / rust / go / java / c_cpp / dotnet / html_css / lua / ruby（默认不选）。
    - 固定加入、不询问的五段：编辑器垃圾文件 / 密钥文件（.env）/ 临时文件（tmp、temp）/ 日志文件 / `init_your_proj/` 工具自身。
    - 单独询问：是否把 AI agent 工具目录加入（`.hermes/` 等，默认 n）。
