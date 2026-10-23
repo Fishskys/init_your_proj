@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import unittest
 
-from init_your_proj.gitignore_gen import (
+from iyp.gitignore_gen import (
     DEFAULT_KEYS, LABELS, MARK, SEGMENTS, _parse_segments, build_gitignore, merge,
 )
 
@@ -17,10 +17,10 @@ def build(keys):
 
 
 class TestSegments(unittest.TestCase):
-    def test_no_stale_init_your_proj_segment(self):
+    def test_no_stale_iyp_segment(self):
         # 早期「clone 到用户项目」用法的过时段已删除
-        self.assertNotIn("init_your_proj", SEGMENTS)
-        self.assertNotIn("init_your_proj", LABELS)
+        self.assertNotIn("iyp", SEGMENTS)
+        self.assertNotIn("iyp", LABELS)
 
     def test_default_keys_are_four(self):
         self.assertEqual(DEFAULT_KEYS, ["editor", "env", "tmp", "logs"])

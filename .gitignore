@@ -1,4 +1,4 @@
-# init_your_proj 自身
+# iyp 自身（仓库名仍为 init_your_proj）
 # Python
 __pycache__/
 *.py[cod]
@@ -33,8 +33,8 @@ npm-debug.log*
 yarn-error.log*
 yarn-debug.log*
 
-# --- init_your_proj ---
-init_your_proj.toml
+# --- iyp ---
+iyp.toml
 log/
 
 # --- 构建产物（打包/安装） ---

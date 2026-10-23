@@ -5,7 +5,7 @@ import unittest
 
 from tests.helpers import ip, mac
 
-from init_your_proj import defaults
+from iyp import defaults
 
 
 class TestDefaultKeywords(unittest.TestCase):

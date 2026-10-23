@@ -93,7 +93,7 @@ def _wl_file_match(rel: str, w: str) -> bool:
 def scan(root: Path, cfg: dict, files: list[Path]) -> list[Hit]:
     patterns = build_patterns(cfg)
     if not patterns:
-        warn("无可用关键词组：init_your_proj.toml 的 [[keywords.groups]] 为空或解析失败")
+        warn("无可用关键词组：iyp.toml 的 [[keywords.groups]] 为空或解析失败")
         return []
     skip_names = set(DEFAULT_SKIP_FILES) | set(cfg.get("check", {}).get("skip_files", []))
     wl_files = [f for f in cfg.get("check", {}).get("whitelist_files", []) if f]
@@ -233,7 +233,7 @@ def cmd_check(args: list[str]) -> int:
     if blocking:
         levels = "high/medium/low" if strict else "high/medium"
         tip = ("处置建议：删除该行，或替换为环境变量/占位符；\n"
-               "确属误报（文档示例/测试数据）请把该行加入 init_your_proj.toml 的\n"
+               "确属误报（文档示例/测试数据）请把该行加入 iyp.toml 的\n"
                "check.whitelist_strings（子串匹配）后重新提交。")
         if scope == "git":
             tip = ("注意：--git 扫描的是历史提交，泄漏已入库。修复需两步：\n"

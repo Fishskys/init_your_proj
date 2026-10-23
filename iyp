@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""init_your_proj 可执行入口（源码模式）。
+"""iyp 可执行入口（源码模式）。
 
 用法：把本仓库根加入 PATH 后直接 `iyp <子命令>`；也可
 `python3 /path/to/init_your_proj/iyp <子命令>`。
@@ -14,10 +14,11 @@ import sys
 _HERE = os.path.dirname(os.path.abspath(__file__))
 # 仓库根就是本文件所在目录；设置 IYP_HOME 让工具配置落到仓库根（源码模式语义）
 os.environ.setdefault("IYP_HOME", _HERE)
-if _HERE not in sys.path:
-    sys.path.insert(0, _HERE)
+for p in (_HERE, os.path.join(_HERE, "src")):
+    if p not in sys.path:
+        sys.path.insert(0, p)
 
-from init_your_proj.cli import main
+from iyp.cli import main
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

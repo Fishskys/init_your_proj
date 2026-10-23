@@ -9,7 +9,7 @@ from pathlib import Path
 
 from tests.helpers import grp, make_cfg, ip
 
-from init_your_proj import common
+from iyp import common
 
 
 class TestIpInWhitelist(unittest.TestCase):
@@ -119,7 +119,7 @@ class TestLoadConfigThreeLayers(unittest.TestCase):
 
     def test_user_increment_over_default(self):
         # 只写用户层：disable 一个内置组 + 追加字符串白名单
-        (self.userproj / "init_your_proj.toml").write_text(
+        (self.userproj / "iyp.toml").write_text(
             '[keywords]\ndisable = ["github_pat"]\n\n'
             '[check]\nwhitelist_strings = ["MY_TOKEN_PLACEHOLDER"]\n',
             encoding="utf-8",
@@ -134,7 +134,7 @@ class TestLoadConfigThreeLayers(unittest.TestCase):
 
     def test_broken_toml_reports_clear_error(self):
         """坏 TOML 不应裸 traceback，而应给出清晰错误并以 exit 1 结束。"""
-        (self.userproj / "init_your_proj.toml").write_text("这不是 toml [[[", encoding="utf-8")
+        (self.userproj / "iyp.toml").write_text("这不是 toml [[[", encoding="utf-8")
         import io
         from contextlib import redirect_stderr
         err = io.StringIO()
@@ -184,7 +184,7 @@ class TestEnsureToolConfig(unittest.TestCase):
                     path, created = common.ensure_tool_config()
                 self.assertTrue(created)
                 self.assertTrue(path.exists())
-                self.assertEqual(path.parent, nested / "init_your_proj")
+                self.assertEqual(path.parent, nested / "iyp")
             finally:
                 for k, v in old.items():
                     if v is None:
@@ -218,8 +218,8 @@ class TestToolConfigPathLocation(unittest.TestCase):
             try:
                 with mock.patch.object(common, "PACKAGE_DIR", Path(fake_pkg)):
                     p = common.tool_config_path()
-                self.assertEqual(p.parent, Path(d) / "init_your_proj")
-                self.assertEqual(p.name, "init_your_proj.toml")
+                self.assertEqual(p.parent, Path(d) / "iyp")
+                self.assertEqual(p.name, "iyp.toml")
             finally:
                 self._restore(old)
 
@@ -229,7 +229,7 @@ class TestToolConfigPathLocation(unittest.TestCase):
             os.environ["IYP_HOME"] = d
             os.environ["XDG_CONFIG_HOME"] = "/somewhere/else"
             try:
-                self.assertEqual(common.tool_config_path(), Path(d) / "init_your_proj.toml")
+                self.assertEqual(common.tool_config_path(), Path(d) / "iyp.toml")
             finally:
                 self._restore(old)
 
@@ -238,7 +238,7 @@ class TestToolConfigPathLocation(unittest.TestCase):
             old = self._clean_env()
             os.environ["XDG_CONFIG_HOME"] = d
             try:
-                target = Path(d) / "init_your_proj" / "init_your_proj.toml"
+                target = Path(d) / "iyp" / "iyp.toml"
                 target.parent.mkdir(parents=True)
                 target.write_text("", encoding="utf-8")
                 self.assertEqual(common.tool_config_path(), target)

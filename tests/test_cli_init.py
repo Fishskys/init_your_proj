@@ -12,7 +12,7 @@ from unittest import mock
 
 from tests.helpers import git, init_repo
 
-from init_your_proj import agents_init, cli
+from iyp import agents_init, cli
 
 
 class TestCliParsing(unittest.TestCase):
@@ -46,7 +46,7 @@ class TestCliParsing(unittest.TestCase):
         self.assertEqual(cm.exception.code, 2)
 
     def test_check_dispatch_stage(self):
-        with mock.patch("init_your_proj.checker.cmd_check", return_value=0) as m:
+        with mock.patch("iyp.checker.cmd_check", return_value=0) as m:
             rc = cli.main(["check", "--stage", "--strict", "--raw", "/tmp/x"])
         self.assertEqual(rc, 0)
         args = m.call_args[0][0]
@@ -56,7 +56,7 @@ class TestCliParsing(unittest.TestCase):
         self.assertEqual(args[0], "/tmp/x")
 
     def test_check_dispatch_default_dir(self):
-        with mock.patch("init_your_proj.checker.cmd_check", return_value=0) as m:
+        with mock.patch("iyp.checker.cmd_check", return_value=0) as m:
             cli.main(["check"])
         args = m.call_args[0][0]
         self.assertFalse(any(a in args for a in ("--stage", "--git", "--tracked")))
@@ -74,7 +74,7 @@ class TestInitFlow(unittest.TestCase):
         self._toolhome = Path(self._tmp.name) / "toolhome"
         (self._toolhome / "templates").mkdir(parents=True)
         import shutil
-        real = Path(__file__).resolve().parents[1] / "init_your_proj" / "templates"
+        real = Path(__file__).resolve().parents[1] / "src" / "iyp" / "templates"
         for f in real.iterdir():
             shutil.copy(f, self._toolhome / "templates" / f.name)
         os.environ["IYP_HOME"] = str(self._toolhome)
@@ -105,24 +105,24 @@ class TestInitFlow(unittest.TestCase):
         gi = (self.root / ".gitignore").read_text(encoding="utf-8")
         self.assertIn("__pycache__/", gi)
         self.assertIn("# --- Python ---", gi)
-        # 无过时 init_your_proj 段
-        self.assertNotIn("init_your_proj 工具自身", gi)
+        # 无过时 iyp 段
+        self.assertNotIn("iyp 工具自身", gi)
 
     def test_config_file_auto_gitignored(self):
         rc = self._run_init(["1", "n", "y"])
         self.assertEqual(rc, 0)
-        self.assertTrue((self.root / "init_your_proj.toml").exists())
+        self.assertTrue((self.root / "iyp.toml").exists())
         gi = (self.root / ".gitignore").read_text(encoding="utf-8")
-        self.assertIn("init_your_proj.toml", gi)
+        self.assertIn("iyp.toml", gi)
         # 真正被 git 忽略
         init_repo(self.root)
-        r = git(self.root, "check-ignore", "init_your_proj.toml", check=False)
-        self.assertEqual(r.returncode, 0, "init_your_proj.toml 应被 git 忽略")
+        r = git(self.root, "check-ignore", "iyp.toml", check=False)
+        self.assertEqual(r.returncode, 0, "iyp.toml 应被 git 忽略")
 
     def test_config_file_declined(self):
         rc = self._run_init(["1", "n", "n"])
         self.assertEqual(rc, 0)
-        self.assertFalse((self.root / "init_your_proj.toml").exists())
+        self.assertFalse((self.root / "iyp.toml").exists())
 
     def test_existing_gitignore_appends_grouped(self):
         rc = self._run_init(["1", "n", "y", "n"],
@@ -145,16 +145,16 @@ class TestEntryPoints(unittest.TestCase):
         repo = Path(__file__).resolve().parents[1]
         r = subprocess.run([sys.executable, str(repo / "iyp"), "--version"],
                            capture_output=True, text=True)
-        from init_your_proj import __version__
+        from iyp import __version__
         self.assertEqual(r.returncode, 0)
         self.assertIn(__version__, r.stdout)
 
     def test_pkg_iyp_runs_version(self):
         import subprocess
         repo = Path(__file__).resolve().parents[1]
-        r = subprocess.run([sys.executable, str(repo / "init_your_proj" / "iyp"), "--version"],
+        r = subprocess.run([sys.executable, str(repo / "src" / "iyp" / "iyp"), "--version"],
                            capture_output=True, text=True)
-        from init_your_proj import __version__
+        from iyp import __version__
         self.assertEqual(r.returncode, 0)
         self.assertIn(__version__, r.stdout)
 

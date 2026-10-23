@@ -16,10 +16,10 @@ GREEN = "\033[32m"
 CYAN = "\033[36m"
 DIM = "\033[2m"
 
-CONFIG_NAME = "init_your_proj.toml"
-PACKAGE_DIR = Path(__file__).resolve().parent          # .../init_your_proj（Python 包目录）
+CONFIG_NAME = "iyp.toml"
+PACKAGE_DIR = Path(__file__).resolve().parent          # .../iyp（Python 包目录）
 # 工具仓库根：优先 IYP_HOME 环境变量（入口脚本设置），否则用包位置推导。
-# templates 与 init_your_proj.toml 都在这里；与用户项目目录无关。
+# templates 与 iyp.toml 都在这里；与用户项目目录无关。
 PROJECT_ROOT = Path(os.environ.get("IYP_HOME", "")) if os.environ.get("IYP_HOME") else PACKAGE_DIR.parent
 if not PROJECT_ROOT.exists():
     PROJECT_ROOT = PACKAGE_DIR.parent
@@ -56,11 +56,11 @@ def is_git_repo(root: Path) -> bool:
     return r.returncode == 0 and r.stdout.strip() == "true"
 
 
-# ---------------- 配置（初始默认由 defaults 生成；用户增量 = 项目根可选 init_your_proj.toml） ----------------
+# ---------------- 配置（初始默认由 defaults 生成；用户增量 = 项目根可选 iyp.toml） ----------------
 
-CONFIG_TEMPLATE = '''# init_your_proj 用户增量配置（放在用户项目根目录，可选；不写则全部走默认）
+CONFIG_TEMPLATE = '''# iyp 用户增量配置（放在用户项目根目录，可选；不写则全部走默认）
 # 完整默认值由工具内置（含动态本机值），这里只写要覆盖/追加的部分。
-# 完整说明见 init_your_proj 工具目录 README.md
+# 完整说明见 iyp 工具目录 README.md
 
 [keywords]
 # 停用内置关键词组（写组名）
@@ -82,7 +82,7 @@ skip_files = []
 '''
 
 def config_path(root: Path) -> Path:
-    """用户增量配置 = 用户项目根目录下的 init_your_proj.toml（可选）。"""
+    """用户增量配置 = 用户项目根目录下的 iyp.toml（可选）。"""
     return root / CONFIG_NAME
 
 
@@ -170,8 +170,8 @@ def toml_repr(s: str) -> str:
 
 
 def load_config(root: Path) -> dict:
-    """配置合并链：内置默认 → 工具根 init_your_proj.toml（首次使用自动生成，本机值）
-    → 用户项目根 init_your_proj.toml（用户增量，可选）。
+    """配置合并链：内置默认 → 工具根 iyp.toml（首次使用自动生成，本机值）
+    → 用户项目根 iyp.toml（用户增量，可选）。
 
     合并语义：
       - 工具根 toml 是「全量落盘版」：若其 keywords.groups 非空，则**替换**内置组列表
@@ -227,18 +227,18 @@ def _user_config_dir() -> Path:
     if sys.platform == "win32":
         base = os.environ.get("APPDATA")
         if base:
-            return Path(base) / "init_your_proj"
+            return Path(base) / "iyp"
     base = os.environ.get("XDG_CONFIG_HOME")
     if base:
-        return Path(base) / "init_your_proj"
-    return Path.home() / ".config" / "init_your_proj"
+        return Path(base) / "iyp"
+    return Path.home() / ".config" / "iyp"
 
 
 def templates_dir() -> Path:
     """模板目录解析。
 
     - 优先 IYP_HOME/templates（源码模式或测试隔离目录里放了一份时）；
-    - 否则用包内自带的 init_your_proj/templates（安装后即 package data）。
+    - 否则用包内自带的 iyp/templates（安装后即 package data）。
     """
     env = os.environ.get("IYP_HOME", "")
     if env:
@@ -252,9 +252,9 @@ def tool_config_path() -> Path:
     """本机配置文件的落点。
 
     优先级（保证"用户改过的白名单不丢"）：
-      1. IYP_HOME 显式指定（源码模式 / 测试隔离）→ <IYP_HOME>/init_your_proj.toml
-      2. 已有的 XDG 用户配置 → <config_dir>/init_your_proj.toml
-      3. 源码模式下仓库根已有旧配置（向后兼容，不丢老白名单）→ <repo>/init_your_proj.toml
+      1. IYP_HOME 显式指定（源码模式 / 测试隔离）→ <IYP_HOME>/iyp.toml
+      2. 已有的 XDG 用户配置 → <config_dir>/iyp.toml
+      3. 源码模式下仓库根已有旧配置（向后兼容，不丢老白名单）→ <repo>/iyp.toml
       4. 默认走 XDG 用户配置目录（安装态；不写 site-packages）
     """
     env = os.environ.get("IYP_HOME", "")
@@ -281,7 +281,7 @@ def ensure_tool_config() -> tuple[Path, bool]:
     # 本机落盘版：全量展开内置默认（含动态本机值），用户可直接改
     from .defaults import all_default_keywords, DEFAULT_IP_WHITELIST
     lines = [
-        "# init_your_proj 本机配置（首次使用时自动生成，含本机动态值）",
+        "# iyp 本机配置（首次使用时自动生成，含本机动态值）",
         "# 与用户项目根的增量配置合并生效；本机配置不随仓库分发（已被 .gitignore 排除）。",
         "",
         "[[keywords.groups]]",

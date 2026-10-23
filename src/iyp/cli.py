@@ -13,7 +13,7 @@ iyp {__version__} — 多工程可复用 git 基础设施
   iyp init [path]
       项目初始化：复制 templates/ 下模板为项目根 AGENTS.md / README.md，
       交互式生成个性化 .gitignore，未 git init 则自动 git init，
-      并生成用户增量配置 init_your_proj.toml（询问，默认 n）。
+      并生成用户增量配置 iyp.toml（询问，默认 n）。
       path  项目根目录（默认当前目录；也可 /path/to/proj）
 
   iyp check [path] [--dir | --stage | --git | --tracked] [--strict] [--raw]
@@ -39,7 +39,7 @@ iyp {__version__} — 多工程可复用 git 基础设施
   # 全库体检（当前工作区全部被跟踪文件）：
   iyp check --tracked /path/to/proj
 
-配置：三层合并（内置默认 → 工具根 init_your_proj.toml → 用户项目根 init_your_proj.toml 增量）。
+配置：三层合并（内置默认 → 工具根 iyp.toml → 用户项目根 iyp.toml 增量）。
 详见工具目录 README.md。
 """
 

@@ -4,8 +4,8 @@
 2. 把 templates/ 下模板复制到项目根：AGENTS_template.md→AGENTS.md、README_template.md→README.md；
 3. 交互式问答生成个性化 .gitignore（固定四段 + 语言段 + 可选 AI agent 目录）；
 4. 未 git 初始化则 git init；
-5. 确保本机配置 init_your_proj.toml 存在（首次自动生成到 XDG 配置目录）；
-   询问是否在用户项目根创建增量配置 init_your_proj.toml（默认 n，选 y 自动加入 .gitignore）。
+5. 确保本机配置 iyp.toml 存在（首次自动生成到 XDG 配置目录）；
+   询问是否在用户项目根创建增量配置 iyp.toml（默认 n，选 y 自动加入 .gitignore）。
 """
 from __future__ import annotations
 
@@ -48,7 +48,7 @@ def cmd_init(args: list[str]) -> int:
     _copy_template(resolve_template("AGENTS_template.md"), root / "AGENTS.md", "AGENTS.md")
     _copy_template(resolve_template("README_template.md"), root / "README.md", "README.md")
 
-    # 2) 交互式生成 .gitignore（默认把 init_your_proj/ 加进去）
+    # 2) 交互式生成 .gitignore（默认把 iyp/ 加进去）
     ret = cmd_ignore_flow(root)
 
     # 3) git 检测：未初始化则执行 git init
@@ -71,21 +71,21 @@ def cmd_init(args: list[str]) -> int:
     if tcreated:
         print(c(f"首次使用：已生成本机配置 {tpath}", GREEN))
 
-    ans = input(c("是否需要在用户项目根目录创建配置文件 init_your_proj.toml？[y/n]（默认: n）: ")).strip().lower()
+    ans = input(c("是否需要在用户项目根目录创建配置文件 iyp.toml？[y/n]（默认: n）: ")).strip().lower()
     if ans == "y":
         ucfg = write_user_config_template(root)
         print(c(f"已生成用户增量配置模板: {ucfg}（check 会与工具本机配置合并）", GREEN))
         gi = root / ".gitignore"
         if gi.exists():
             gitext = gi.read_text(encoding="utf-8")
-            if "init_your_proj.toml" not in gitext:
+            if "iyp.toml" not in gitext:
                 if not gitext.endswith("\n"):
                     gitext += "\n"
-                gitext += "\n# init_your_proj 增量配置\ninit_your_proj.toml\n"
+                gitext += "\n# iyp 增量配置\niyp.toml\n"
                 gi.write_text(gitext, encoding="utf-8")
-                print(c("已把 init_your_proj.toml 加入 .gitignore", GREEN))
+                print(c("已把 iyp.toml 加入 .gitignore", GREEN))
         else:
-            warn("项目根无 .gitignore，请自行把 init_your_proj.toml 加入忽略列表")
+            warn("项目根无 .gitignore，请自行把 iyp.toml 加入忽略列表")
     else:
-        print(c("提示：之后可随时在用户项目根创建 init_your_proj.toml 增量配置（模板见工具 README）", DIM))
+        print(c("提示：之后可随时在用户项目根创建 iyp.toml 增量配置（模板见工具 README）", DIM))
     return ret

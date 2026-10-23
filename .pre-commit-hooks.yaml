@@ -1,4 +1,4 @@
-# init_your_proj 的 pre-commit 框架 hook 清单
+# iyp 的 pre-commit 框架 hook 清单（仓库名：init_your_proj）
 # 用法见 README「用法二：pre-commit 框架」——在用户项目 .pre-commit-config.yaml 中
 # 以远程仓库地址（repo: https://github.com/Fishskys/init_your_proj + rev: tag）引用，
 # language: system 表示直接调用环境中已安装的 iyp（需 iyp 在 PATH 中）。

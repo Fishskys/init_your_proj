@@ -1,4 +1,6 @@
-# init_your_proj
+# iyp
+
+> 仓库名：`init_your_proj`；安装名 / 命令名：`iyp`。
 
 > 多工程可复用的 git 基础设施：一条命令完成项目初始化（AGENTS.md + .gitignore），一条命令在提交前拦住密钥与隐私泄漏。Python 3.11+，零第三方依赖，完全离线。
 
@@ -39,8 +41,8 @@ pip install --user git+https://github.com/Fishskys/init_your_proj
 
 > 需要 **Python 3.11+**（纯标准库，无第三方依赖）。
 > 安装产出的是 PATH 里一个真正的 `iyp` 命令（不是软链）——因此在 IDE / GUI Git 客户端 / 非交互 shell 里也能找到它，
-> 不会出现「终端里 `iyp` 正常、IDE 提交时却报 `Executable iyp not found`」。升级：`uv tool upgrade init-your-proj`
-> （或 `pipx upgrade init-your-proj` / `pip install -U`）。卸载：`uv tool uninstall init-your-proj`。
+> 不会出现「终端里 `iyp` 正常、IDE 提交时却报 `Executable iyp not found`」。升级：`uv tool upgrade iyp`
+> （或 `pipx upgrade iyp` / `pip install -U`）。卸载：`uv tool uninstall iyp`。
 
 ### 从源码直接运行（开发者）
 
@@ -51,6 +53,8 @@ git clone https://github.com/Fishskys/init_your_proj /path/to/init_your_proj
 /path/to/init_your_proj/iyp init /path/to/my-proj
 /path/to/init_your_proj/iyp check /path/to/my-proj
 ```
+
+> 源码模式下本机配置写在仓库根的 `iyp.toml`（已 gitignore）；安装态写在 `~/.config/iyp/iyp.toml`（Windows 为 `%APPDATA%\iyp\`）。
 
 ## 🔧 使用
 
@@ -108,7 +112,7 @@ pre-commit install          # 在用户项目根执行，写入 .git/hooks/pre-c
    - 固定加入、不询问的四段：编辑器垃圾文件 / 密钥文件（.env）/ 临时文件（tmp、temp）/ 日志文件。
    - 单独询问：是否把 AI agent 工具目录加入（`.hermes/` 等，默认 n）。
 3. 检测项目是否已 git 初始化：没有则自动 `git init`。
-4. 询问是否在用户项目根创建 `init_your_proj.toml` 增量配置（默认 n）；选 y 会生成模板并自动加入 `.gitignore`。
+4. 询问是否在用户项目根创建 `iyp.toml` 增量配置（默认 n）；选 y 会生成模板并自动加入 `.gitignore`。
 
 模板更新方式：直接编辑 `templates/` 下的模板文件并提交。
 
@@ -133,17 +137,17 @@ pre-commit install          # 在用户项目根执行，写入 .git/hooks/pre-c
 - 默认 `high`/`medium` 阻断（非零退出码让 Git 取消提交），`low` 仅警告；**`--strict` 时 `low` 也阻断**。
 - `--git` 命中时额外提示：泄漏已入库，需修改当前内容 + git filter-repo/BFG 重写历史。
 - `--dir` 自动跳过 `.git`/`node_modules`/`__pycache__`/`.venv` 等垃圾目录与二进制文件。
-- 误报处置：把特征子串加入 `init_your_proj.toml` 的 `check.whitelist_strings`（子串匹配）或 `ip_whitelist`（IP 类，支持 CIDR）。
+- 误报处置：把特征子串加入 `iyp.toml` 的 `check.whitelist_strings`（子串匹配）或 `ip_whitelist`（IP 类，支持 CIDR）。
 - 检测内容 = 内置默认 + 工具根本机配置 + 用户项目根增量 toml（见配置说明）。
 
 ---
 
 ## ⚙️ 配置说明
 
-配置分三层，合并顺序：**内置默认 → 工具根 `init_your_proj.toml`（本机值）→ 用户项目根 `init_your_proj.toml`（用户增量）**：
+配置分三层，合并顺序：**内置默认 → 工具根 `iyp.toml`（本机值）→ 用户项目根 `iyp.toml`（用户增量）**：
 
 1. **内置默认**：17 组关键词（含动态本机值）+ 默认 IP 白名单，永远生效，无需任何文件。
-2. **工具根本机配置**（`init_your_proj/init_your_proj.toml`）：clone 后**首次使用自动生成**（全量展开内置默认，含本机动态值），已被本仓库 `.gitignore` 排除；可在此改本机相关的 pattern、停用组。
+2. **工具根本机配置**（`iyp.toml`，源码模式在仓库根、安装态在 `~/.config/iyp/`）：clone 后**首次使用自动生成**（全量展开内置默认，含本机动态值），已被本仓库 `.gitignore` 排除；可在此改本机相关的 pattern、停用组。
 3. **用户项目根增量**（可选）：init 时询问是否创建（默认 n），也可随时手动创建；只写想改的部分，check 时增量合并。若选择创建，会自动把该文件加入项目 `.gitignore`。
 
 | 用户增量配置项 | 默认 | 作用描述 |
@@ -215,7 +219,7 @@ init 全流程（含增量配置自动入 .gitignore）。
 欢迎提交 Issue 与 Pull Request！
 
 1. Fork 本仓库并新建特性分支 (`git checkout -b feature/AmazingFeature`)。
-2. 新增关键词组请同步更新 `init_your_proj/defaults.py` 与本 README 的配置说明。
+2. 新增关键词组请同步更新 `src/iyp/defaults.py` 与本 README 的配置说明。
 3. 提交代码变更 (`git commit -m 'feat: add some amazing feature'`)。
 4. 推送至分支并提交 Pull Request。
 
@@ -225,13 +229,13 @@ init 全流程（含增量配置自动入 .gitignore）。
 
 ```
 init_your_proj/
-├── iyp                   # 源码模式入口（仓库根与 init_your_proj/ 各一份）
+├── iyp                   # 源码模式入口（仓库根；包内镜像在 src/iyp/iyp）
 ├── AGENTS.md             # 本仓库自身的协作准则（由 init 模板生成后按项目改写）
-├── init_your_proj.toml   # 工具根本机配置（首次使用自动生成，已 gitignore）
+├── iyp.toml              # 工具根本机配置（首次使用自动生成，已 gitignore）
 ├── .pre-commit-hooks.yaml # pre-commit 框架 hook 清单（id: iyp-check）
 ├── tests/                # 全量回归测试（标准库 unittest，零依赖）
 ├── run_tests.sh          # 测试入口
-├── init_your_proj/       # Python 包（pip/uv tool 安装的模块）
+├── src/iyp/              # Python 包（pip/uv tool 安装的模块）
 │   ├── __main__.py       # 入口
 │   ├── cli.py            # 子命令分发与 help（init / check）
 │   ├── common.py         # IYP_HOME 定位、三层配置合并、IP CIDR 白名单、终端工具

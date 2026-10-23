@@ -1,4 +1,4 @@
-"""init_your_proj: 多工程可复用 git 基础设施（版本单一来源）。
+"""iyp: 多工程可复用 git 基础设施（版本单一来源）。
 
 子命令:
   init   初始化项目（复制 AGENTS.md/README.md 模板 + 交互生成 .gitignore + git init + 可选增量配置）

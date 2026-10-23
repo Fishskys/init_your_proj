@@ -1,6 +1,6 @@
-"""init_your_proj 内置默认关键词组（三层配置的第一层）。
+"""iyp 内置默认关键词组（三层配置的第一层）。
 
-用户侧配置文件为项目根目录的 init_your_proj.toml，结构见 README。
+用户侧配置文件为项目根目录的 iyp.toml，结构见 README。
 此处只放 keyword check 的默认关键词组、默认跳过文件名与 IP 白名单；
 .gitignore 问答树在 gitignore_gen.py 内。
 """

@@ -3,7 +3,7 @@ requires = ["setuptools>=61"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "init-your-proj"
+name = "iyp"
 dynamic = ["version"]
 description = "多工程可复用 git 基础设施：项目初始化（AGENTS.md/.gitignore）+ 提交前敏感信息检查"
 readme = "README.md"
@@ -23,17 +23,18 @@ classifiers = [
 ]
 
 [project.scripts]
-iyp = "init_your_proj.cli:entry"
+iyp = "iyp.cli:entry"
 
 [project.urls]
 Homepage = "https://github.com/Fishskys/init_your_proj"
 Repository = "https://github.com/Fishskys/init_your_proj"
 
 [tool.setuptools]
-packages = ["init_your_proj"]
+package-dir = { "" = "src" }
+packages = ["iyp"]
 
 [tool.setuptools.dynamic]
-version = { attr = "init_your_proj.__version__" }
+version = { attr = "iyp.__version__" }
 
 [tool.setuptools.package-data]
-init_your_proj = ["templates/*.md"]
+iyp = ["templates/*.md"]

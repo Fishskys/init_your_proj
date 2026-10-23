@@ -10,18 +10,18 @@
 
 ### 1.1 项目定位与核心技术栈
 
-- **项目名称**​：​`init_your_proj`
+- **项目名称**​：​`iyp`（GitHub 仓库名仍为 `init_your_proj`）
 - **核心定位**​：​`多工程可复用 git 基础设施`
 - **核心技术栈**：
 
   - **语言与运行时**​：​`Python 3.11+`，仅标准库（argparse / tomllib / pathlib / ipaddress / re），零第三方依赖，完全离线
-  - **形态**​：单包 CLI 工具（`init_your_proj/` Python 包 + `iyp` 命令），无服务、无数据库、无网络调用
+  - **形态**​：单包 CLI 工具（`src/iyp/` Python 包 + `iyp` 命令），无服务、无数据库、无网络调用
 
 ### 1.2 目录结构与权责边界
 
 ```plaintext
-├── iyp                      # 源码模式入口（仓库根与 init_your_proj/ 各一份）
-├── init_your_proj/          # Python 包（pip/uv tool 安装的模块）
+├── iyp                      # 源码模式入口（仓库根；包内镜像在 src/iyp/iyp）
+├── src/iyp/                 # Python 包（pip/uv tool 安装的模块）
 │   ├── cli.py               # 子命令分发与 help 文本（init / check）
 │   ├── common.py            # IYP_HOME 定位、三层配置合并、IP CIDR 白名单、git/终端工具
 │   ├── defaults.py          # 默认关键词组 + 动态本机关键词（用户名/家目录/主机名/局域网 IP）
@@ -30,13 +30,13 @@
 │   ├── checker.py           # check 核心（dir/stage/git/tracked 四种范围 + 白名单 + 脱敏）
 │   └── templates/           # init 复制的模板（package data）：AGENTS_template.md / README_template.md
 ├── tests/                   # 全量回归测试（标准库 unittest，零依赖）+ run_tests.sh
-├── init_your_proj.toml      # 工具根本机配置（首次使用自动生成，已 gitignore）
+├── iyp.toml                 # 工具根本机配置（首次使用自动生成，已 gitignore）
 └── README.md
 ```
 
 **目录要点清单：**
 
-- `init_your_proj/templates/`：模板是 init 的唯一内容来源，改模板即改 init 产出；不得在 agents_init.py 里硬编码模板内容。模板随包分发（package data），安装后仍可用。
+- `src/iyp/templates/`：模板是 init 的唯一内容来源，改模板即改 init 产出；不得在 agents_init.py 里硬编码模板内容。模板随包分发（package data），安装后仍可用。
 - `defaults.py`：检测内容的唯一内置源；用户 toml 是增量，check 以合并结果为准。
 - `checker.py`：零交互、零修改是硬约束——禁止引入 input() 调用或自动改写用户文件的逻辑。
 
