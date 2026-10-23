@@ -218,6 +218,20 @@ def _tool_root() -> Path:
     return Path(env) if env else PACKAGE_DIR.parent
 
 
+def templates_dir() -> Path:
+    """模板目录解析。
+
+    - 优先 IYP_HOME/templates（源码模式或测试隔离目录里放了一份时）；
+    - 否则用包内自带的 init_your_proj/templates（安装后即 package data）。
+    """
+    env = os.environ.get("IYP_HOME", "")
+    if env:
+        cand = Path(env) / "templates"
+        if cand.is_dir():
+            return cand
+    return PACKAGE_DIR / "templates"
+
+
 def tool_config_path() -> Path:
     """本工具项目根的配置文件 = <工具仓库>/init_your_proj.toml（本机检测值落盘）。
 

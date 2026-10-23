@@ -18,8 +18,8 @@ from .gitignore_gen import cmd_ignore_flow
 
 
 def resolve_template(name: str) -> Path:
-    from .common import PROJECT_ROOT
-    p = PROJECT_ROOT / "templates" / name
+    from .common import templates_dir
+    p = templates_dir() / name
     if not p.exists():
         die(f"模板不存在: {p}")
     return p

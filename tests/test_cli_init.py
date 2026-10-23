@@ -74,7 +74,7 @@ class TestInitFlow(unittest.TestCase):
         self._toolhome = Path(self._tmp.name) / "toolhome"
         (self._toolhome / "templates").mkdir(parents=True)
         import shutil
-        real = Path(__file__).resolve().parents[1] / "templates"
+        real = Path(__file__).resolve().parents[1] / "init_your_proj" / "templates"
         for f in real.iterdir():
             shutil.copy(f, self._toolhome / "templates" / f.name)
         os.environ["IYP_HOME"] = str(self._toolhome)

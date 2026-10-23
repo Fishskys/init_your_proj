@@ -21,14 +21,14 @@
 
 ```plaintext
 ├── iyp                      # 源码模式入口（仓库根与 init_your_proj/ 各一份）
-├── templates/               # init 复制的模板：AGENTS_template.md / README_template.md
-├── init_your_proj/          # 全部源码（Python 包）
+├── init_your_proj/          # Python 包（pip/uv tool 安装的模块）
 │   ├── cli.py               # 子命令分发与 help 文本（init / check）
 │   ├── common.py            # IYP_HOME 定位、三层配置合并、IP CIDR 白名单、git/终端工具
 │   ├── defaults.py          # 默认关键词组 + 动态本机关键词（用户名/家目录/主机名/局域网 IP）
 │   ├── agents_init.py       # init 流程（确认路径 → 复制模板 → gitignore 问答 → git init → 配置）
 │   ├── gitignore_gen.py     # .gitignore 问答树（语言菜单 + 固定四段）
-│   └── checker.py           # check 核心（dir/stage/git/tracked 四种范围 + 白名单 + 脱敏）
+│   ├── checker.py           # check 核心（dir/stage/git/tracked 四种范围 + 白名单 + 脱敏）
+│   └── templates/           # init 复制的模板（package data）：AGENTS_template.md / README_template.md
 ├── tests/                   # 全量回归测试（标准库 unittest，零依赖）+ run_tests.sh
 ├── init_your_proj.toml      # 工具根本机配置（首次使用自动生成，已 gitignore）
 └── README.md
@@ -36,7 +36,7 @@
 
 **目录要点清单：**
 
-- `templates/`：模板是 init 的唯一内容来源，改模板即改 init 产出；不得在 agents_init.py 里硬编码模板内容。
+- `init_your_proj/templates/`：模板是 init 的唯一内容来源，改模板即改 init 产出；不得在 agents_init.py 里硬编码模板内容。模板随包分发（package data），安装后仍可用。
 - `defaults.py`：检测内容的唯一内置源；用户 toml 是增量，check 以合并结果为准。
 - `checker.py`：零交互、零修改是硬约束——禁止引入 input() 调用或自动改写用户文件的逻辑。
 

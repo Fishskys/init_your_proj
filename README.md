@@ -240,7 +240,6 @@ init_your_proj/
 ├── AGENTS.md             # 本仓库自身的协作准则（由 init 模板生成后按项目改写）
 ├── init_your_proj.toml   # 工具根本机配置（首次使用自动生成，已 gitignore）
 ├── .pre-commit-hooks.yaml # pre-commit 框架 hook 清单（id: iyp-check）
-├── templates/            # AGENTS.md / README.md 模板
 ├── tests/                # 全量回归测试（标准库 unittest，零依赖）
 ├── run_tests.sh          # 测试入口
 ├── init_your_proj/       # Python 包（pip/uv tool 安装的模块）
@@ -250,6 +249,7 @@ init_your_proj/
 │   ├── agents_init.py    # init（确认路径 + 复制模板 + gitignore 问答 + git init + 配置）
 │   ├── gitignore_gen.py  # .gitignore 问答树
 │   ├── checker.py        # check（dir/stage/git/tracked 四种范围 + 白名单 + 脱敏）
-│   └── defaults.py       # 默认关键词组 + 动态本机关键词生成
+│   ├── defaults.py       # 默认关键词组 + 动态本机关键词生成
+│   └── templates/        # init 复制的模板（package data）
 └── README.md
 ```
