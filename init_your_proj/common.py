@@ -218,6 +218,22 @@ def _tool_root() -> Path:
     return Path(env) if env else PACKAGE_DIR.parent
 
 
+def _user_config_dir() -> Path:
+    """本机配置目录（XDG 规范；Windows 用 %APPDATA%）。
+
+    - Linux/macOS：$XDG_CONFIG_HOME 或 ~/.config
+    - Windows：%APPDATA%
+    """
+    if sys.platform == "win32":
+        base = os.environ.get("APPDATA")
+        if base:
+            return Path(base) / "init_your_proj"
+    base = os.environ.get("XDG_CONFIG_HOME")
+    if base:
+        return Path(base) / "init_your_proj"
+    return Path.home() / ".config" / "init_your_proj"
+
+
 def templates_dir() -> Path:
     """模板目录解析。
 
@@ -233,15 +249,29 @@ def templates_dir() -> Path:
 
 
 def tool_config_path() -> Path:
-    """本工具项目根的配置文件 = <工具仓库>/init_your_proj.toml（本机检测值落盘）。
+    """本机配置文件的落点。
 
-    运行时读取 IYP_HOME（而非 import 时的模块常量），便于换安装位置或测试隔离。
+    优先级（保证"用户改过的白名单不丢"）：
+      1. IYP_HOME 显式指定（源码模式 / 测试隔离）→ <IYP_HOME>/init_your_proj.toml
+      2. 已有的 XDG 用户配置 → <config_dir>/init_your_proj.toml
+      3. 源码模式下仓库根已有旧配置（向后兼容，不丢老白名单）→ <repo>/init_your_proj.toml
+      4. 默认走 XDG 用户配置目录（安装态；不写 site-packages）
     """
-    return _tool_root() / CONFIG_NAME
+    env = os.environ.get("IYP_HOME", "")
+    if env:
+        return Path(env) / CONFIG_NAME
+    xdg = _user_config_dir() / CONFIG_NAME
+    if xdg.exists():
+        return xdg
+    legacy = PACKAGE_DIR.parent / CONFIG_NAME
+    if legacy.exists() and (PACKAGE_DIR.parent / "pyproject.toml").exists():
+        # 源码仓库根（有 pyproject.toml）且已有旧配置 → 继续沿用，避免白名单丢失
+        return legacy
+    return xdg
 
 
 def ensure_tool_config() -> tuple[Path, bool]:
-    """用户 clone 本工具后第一次使用时，在工具项目根生成本机配置文件（已有则不动）。
+    """首次使用时生成本机配置文件（已有则不动）。落点见 tool_config_path()。
 
     返回 (路径, 是否新建)。
     """
@@ -251,8 +281,8 @@ def ensure_tool_config() -> tuple[Path, bool]:
     # 本机落盘版：全量展开内置默认（含动态本机值），用户可直接改
     from .defaults import all_default_keywords, DEFAULT_IP_WHITELIST
     lines = [
-        "# init_your_proj 本工具配置（首次使用时自动生成，含本机动态值）",
-        "# 与用户项目根的增量配置合并生效；本文件已被本仓库 .gitignore 排除。",
+        "# init_your_proj 本机配置（首次使用时自动生成，含本机动态值）",
+        "# 与用户项目根的增量配置合并生效；本机配置不随仓库分发（已被 .gitignore 排除）。",
         "",
         "[[keywords.groups]]",
     ]

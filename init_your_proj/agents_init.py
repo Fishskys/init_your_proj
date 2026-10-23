@@ -4,7 +4,7 @@
 2. 把 templates/ 下模板复制到项目根：AGENTS_template.md→AGENTS.md、README_template.md→README.md；
 3. 交互式问答生成个性化 .gitignore（固定四段 + 语言段 + 可选 AI agent 目录）；
 4. 未 git 初始化则 git init；
-5. 确保工具目录内有本机配置 init_your_proj.toml（首次自动生成）；
+5. 确保本机配置 init_your_proj.toml 存在（首次自动生成到 XDG 配置目录）；
    询问是否在用户项目根创建增量配置 init_your_proj.toml（默认 n，选 y 自动加入 .gitignore）。
 """
 from __future__ import annotations
@@ -69,7 +69,7 @@ def cmd_init(args: list[str]) -> int:
     from .common import ensure_tool_config, write_user_config_template, warn
     tpath, tcreated = ensure_tool_config()
     if tcreated:
-        print(c(f"首次使用：已在本工具目录生成本机配置 {tpath}", GREEN))
+        print(c(f"首次使用：已生成本机配置 {tpath}", GREEN))
 
     ans = input(c("是否需要在用户项目根目录创建配置文件 init_your_proj.toml？[y/n]（默认: n）: ")).strip().lower()
     if ans == "y":

@@ -172,7 +172,7 @@ def cmd_check(args: list[str]) -> int:
     from .common import ensure_tool_config
     tpath, tcreated = ensure_tool_config()
     if tcreated:
-        print(c(f"首次使用：已在本工具目录生成本机配置 {tpath}", GREEN))
+        print(c(f"首次使用：已生成本机配置 {tpath}", GREEN))
     cfg = load_config(root)
     patterns = build_patterns(cfg)
     if not patterns:

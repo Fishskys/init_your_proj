@@ -36,3 +36,9 @@ yarn-debug.log*
 # --- init_your_proj ---
 init_your_proj.toml
 log/
+
+# --- 构建产物（打包/安装） ---
+build/
+dist/
+*.egg-info/
+

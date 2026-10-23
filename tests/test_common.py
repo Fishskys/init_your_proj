@@ -170,5 +170,58 @@ class TestEnsureToolConfig(unittest.TestCase):
         self.assertNotIn("placeholder", common.CONFIG_TEMPLATE)
 
 
+class TestToolConfigPathLocation(unittest.TestCase):
+    """tool_config_path() 的落点优先级（保证安装态不写 site-packages、白名单不丢）。"""
+
+    def _clean_env(self):
+        old = {k: os.environ.get(k) for k in ("IYP_HOME", "XDG_CONFIG_HOME", "APPDATA")}
+        for k in old:
+            os.environ.pop(k, None)
+        return old
+
+    def _restore(self, old):
+        for k, v in old.items():
+            if v is None:
+                os.environ.pop(k, None)
+            else:
+                os.environ[k] = v
+
+    def test_xdg_default_when_no_legacy(self):
+        with tempfile.TemporaryDirectory() as d, tempfile.TemporaryDirectory() as fake_pkg:
+            old = self._clean_env()
+            os.environ["XDG_CONFIG_HOME"] = d
+            from unittest import mock
+            # 隔离真实仓库根：伪造 PACKAGE_DIR，使 legacy 探测找不到旧配置
+            try:
+                with mock.patch.object(common, "PACKAGE_DIR", Path(fake_pkg)):
+                    p = common.tool_config_path()
+                self.assertEqual(p.parent, Path(d) / "init_your_proj")
+                self.assertEqual(p.name, "init_your_proj.toml")
+            finally:
+                self._restore(old)
+
+    def test_iyphome_wins(self):
+        with tempfile.TemporaryDirectory() as d:
+            old = self._clean_env()
+            os.environ["IYP_HOME"] = d
+            os.environ["XDG_CONFIG_HOME"] = "/somewhere/else"
+            try:
+                self.assertEqual(common.tool_config_path(), Path(d) / "init_your_proj.toml")
+            finally:
+                self._restore(old)
+
+    def test_existing_xdg_preferred(self):
+        with tempfile.TemporaryDirectory() as d:
+            old = self._clean_env()
+            os.environ["XDG_CONFIG_HOME"] = d
+            try:
+                target = Path(d) / "init_your_proj" / "init_your_proj.toml"
+                target.parent.mkdir(parents=True)
+                target.write_text("", encoding="utf-8")
+                self.assertEqual(common.tool_config_path(), target)
+            finally:
+                self._restore(old)
+
+
 if __name__ == "__main__":
     unittest.main()
