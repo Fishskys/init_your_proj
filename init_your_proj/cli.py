@@ -107,3 +107,9 @@ def main(argv: list[str]) -> int:
             extra.append("--raw")
         return cmd_check(([args.path] if args.path else []) + extra)
     return 2
+
+
+def entry() -> None:
+    """console_scripts 入口：pip/uv tool/pipx 安装后生成的 iyp 命令调用此函数。"""
+    import sys
+    sys.exit(main(sys.argv[1:]))

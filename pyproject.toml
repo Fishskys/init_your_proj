@@ -1,0 +1,39 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "init-your-proj"
+dynamic = ["version"]
+description = "多工程可复用 git 基础设施：项目初始化（AGENTS.md/.gitignore）+ 提交前敏感信息检查"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+keywords = ["git", "security", "secret-scanning", "pre-commit", "scaffolding"]
+dependencies = []          # 纯标准库，零第三方依赖
+classifiers = [
+    "Environment :: Console",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+    "Topic :: Security",
+    "Topic :: Software Development :: Version Control :: Git",
+]
+
+[project.scripts]
+iyp = "init_your_proj.cli:entry"
+
+[project.urls]
+Homepage = "https://github.com/Fishskys/init_your_proj"
+Repository = "https://github.com/Fishskys/init_your_proj"
+
+[tool.setuptools]
+packages = ["init_your_proj"]
+
+[tool.setuptools.dynamic]
+version = { attr = "init_your_proj.__version__" }
+
+[tool.setuptools.package-data]
+init_your_proj = ["templates/*.md"]
