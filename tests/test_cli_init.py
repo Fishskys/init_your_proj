@@ -12,7 +12,7 @@ from unittest import mock
 
 from tests.helpers import git, init_repo
 
-from scripts import agents_init, cli
+from init_your_proj import agents_init, cli
 
 
 class TestCliParsing(unittest.TestCase):
@@ -46,7 +46,7 @@ class TestCliParsing(unittest.TestCase):
         self.assertEqual(cm.exception.code, 2)
 
     def test_check_dispatch_stage(self):
-        with mock.patch("scripts.checker.cmd_check", return_value=0) as m:
+        with mock.patch("init_your_proj.checker.cmd_check", return_value=0) as m:
             rc = cli.main(["check", "--stage", "--strict", "--raw", "/tmp/x"])
         self.assertEqual(rc, 0)
         args = m.call_args[0][0]
@@ -56,7 +56,7 @@ class TestCliParsing(unittest.TestCase):
         self.assertEqual(args[0], "/tmp/x")
 
     def test_check_dispatch_default_dir(self):
-        with mock.patch("scripts.checker.cmd_check", return_value=0) as m:
+        with mock.patch("init_your_proj.checker.cmd_check", return_value=0) as m:
             cli.main(["check"])
         args = m.call_args[0][0]
         self.assertFalse(any(a in args for a in ("--stage", "--git", "--tracked")))
@@ -145,16 +145,16 @@ class TestEntryPoints(unittest.TestCase):
         repo = Path(__file__).resolve().parents[1]
         r = subprocess.run([sys.executable, str(repo / "iyp"), "--version"],
                            capture_output=True, text=True)
-        from scripts import __version__
+        from init_your_proj import __version__
         self.assertEqual(r.returncode, 0)
         self.assertIn(__version__, r.stdout)
 
-    def test_scripts_iyp_runs_version(self):
+    def test_pkg_iyp_runs_version(self):
         import subprocess
         repo = Path(__file__).resolve().parents[1]
-        r = subprocess.run([sys.executable, str(repo / "scripts" / "iyp"), "--version"],
+        r = subprocess.run([sys.executable, str(repo / "init_your_proj" / "iyp"), "--version"],
                            capture_output=True, text=True)
-        from scripts import __version__
+        from init_your_proj import __version__
         self.assertEqual(r.returncode, 0)
         self.assertIn(__version__, r.stdout)
 

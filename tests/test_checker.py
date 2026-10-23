@@ -8,7 +8,7 @@ from pathlib import Path
 from tests.helpers import (FAKE_AWS, FAKE_AWS2, FAKE_DB_URL, commit_all, grp,
                            init_repo, make_cfg, ip)
 
-from scripts import checker
+from init_your_proj import checker
 
 
 def _write(root: Path, rel: str, content: str) -> Path:
@@ -31,7 +31,7 @@ class TestBuildPatterns(unittest.TestCase):
         self.assertEqual(checker.build_patterns(cfg), [])
 
     def test_defaults_have_no_dup_names(self):
-        from scripts.defaults import all_default_keywords
+        from init_your_proj.defaults import all_default_keywords
         names = [g["name"] for g in all_default_keywords()]
         self.assertEqual(len(names), len(set(names)), f"重复组名: {names}")
 
@@ -190,7 +190,7 @@ class TestCmdCheckScopes(unittest.TestCase):
         self._tmp = tempfile.TemporaryDirectory()
         self.root = Path(self._tmp.name)
         init_repo(self.root)
-        from scripts.common import ensure_tool_config
+        from init_your_proj.common import ensure_tool_config
         ensure_tool_config()
 
     def tearDown(self):
@@ -232,14 +232,14 @@ class TestCmdCheckScopes(unittest.TestCase):
     def test_git_scope_reports_real_lineno(self):
         _write(self.root, "a.txt", "line1\nline2\nx = '" + FAKE_AWS + "'\n")
         commit_all(self.root, "leak")
-        cfg = __import__("scripts.common", fromlist=["load_config"]).load_config(self.root)
+        cfg = __import__("init_your_proj.common", fromlist=["load_config"]).load_config(self.root)
         hits = checker._scan_git_history(self.root, cfg)
         self.assertTrue(hits)
         self.assertEqual(hits[0].lineno, 3)               # @@ hunk 解析出的真实行号
 
     def test_strict_blocks_low(self):
         _write(self.root, "a.txt", "MARKER_LOW_CONTENT\n")
-        from scripts.common import ensure_tool_config, load_config
+        from init_your_proj.common import ensure_tool_config, load_config
         # 在用户项目根写一个 low 组（配置跟随扫描根）
         (self.root / "init_your_proj.toml").write_text(
             '[[keywords.groups]]\nname = "tmp_low"\npattern = "MARKER_LOW_CONTENT"\n'

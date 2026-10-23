@@ -15,14 +15,14 @@
 - **核心技术栈**：
 
   - **语言与运行时**​：​`Python 3.11+`，仅标准库（argparse / tomllib / pathlib / ipaddress / re），零第三方依赖，完全离线
-  - **形态**​：单包 CLI 工具（`scripts/` 包 + `iyp` 可执行入口），无服务、无数据库、无网络调用
+  - **形态**​：单包 CLI 工具（`init_your_proj/` Python 包 + `iyp` 命令），无服务、无数据库、无网络调用
 
 ### 1.2 目录结构与权责边界
 
 ```plaintext
-├── iyp                      # 可执行入口（仓库根与 scripts/ 各一份，设置 IYP_HOME 定位仓库根）
+├── iyp                      # 源码模式入口（仓库根与 init_your_proj/ 各一份）
 ├── templates/               # init 复制的模板：AGENTS_template.md / README_template.md
-├── scripts/                 # 全部源码（单包）
+├── init_your_proj/          # 全部源码（Python 包）
 │   ├── cli.py               # 子命令分发与 help 文本（init / check）
 │   ├── common.py            # IYP_HOME 定位、三层配置合并、IP CIDR 白名单、git/终端工具
 │   ├── defaults.py          # 默认关键词组 + 动态本机关键词（用户名/家目录/主机名/局域网 IP）

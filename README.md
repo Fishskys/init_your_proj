@@ -226,7 +226,7 @@ init 全流程（含增量配置自动入 .gitignore）。
 欢迎提交 Issue 与 Pull Request！
 
 1. Fork 本仓库并新建特性分支 (`git checkout -b feature/AmazingFeature`)。
-2. 新增关键词组请同步更新 `scripts/defaults.py` 与本 README 的配置说明。
+2. 新增关键词组请同步更新 `init_your_proj/defaults.py` 与本 README 的配置说明。
 3. 提交代码变更 (`git commit -m 'feat: add some amazing feature'`)。
 4. 推送至分支并提交 Pull Request。
 
@@ -236,14 +236,14 @@ init 全流程（含增量配置自动入 .gitignore）。
 
 ```
 init_your_proj/
-├── iyp                   # 可执行入口（仓库根与 scripts/ 各一份）
+├── iyp                   # 源码模式入口（仓库根与 init_your_proj/ 各一份）
 ├── AGENTS.md             # 本仓库自身的协作准则（由 init 模板生成后按项目改写）
 ├── init_your_proj.toml   # 工具根本机配置（首次使用自动生成，已 gitignore）
 ├── .pre-commit-hooks.yaml # pre-commit 框架 hook 清单（id: iyp-check）
 ├── templates/            # AGENTS.md / README.md 模板
 ├── tests/                # 全量回归测试（标准库 unittest，零依赖）
 ├── run_tests.sh          # 测试入口
-├── scripts/
+├── init_your_proj/       # Python 包（pip/uv tool 安装的模块）
 │   ├── __main__.py       # 入口
 │   ├── cli.py            # 子命令分发与 help（init / check）
 │   ├── common.py         # IYP_HOME 定位、三层配置合并、IP CIDR 白名单、终端工具

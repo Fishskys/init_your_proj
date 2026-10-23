@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import unittest
 
-from scripts.gitignore_gen import (
+from init_your_proj.gitignore_gen import (
     DEFAULT_KEYS, LABELS, MARK, SEGMENTS, _parse_segments, build_gitignore, merge,
 )
 

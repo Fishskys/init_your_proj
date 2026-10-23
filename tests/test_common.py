@@ -9,7 +9,7 @@ from pathlib import Path
 
 from tests.helpers import grp, make_cfg, ip
 
-from scripts import common
+from init_your_proj import common
 
 
 class TestIpInWhitelist(unittest.TestCase):

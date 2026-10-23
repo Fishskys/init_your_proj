@@ -1,23 +1,23 @@
 #!/usr/bin/env python3
-"""init_your_proj 可执行入口：init_your_proj/iyp 或 init_your_proj/scripts/iyp
+"""init_your_proj 可执行入口（源码模式）。
 
-把本目录（或 scripts/）加入 PATH 后可直接用 `iyp <子命令>` 全局调用；
-由 env 定位仓库根，与启动目录无关。
+用法：把本仓库根加入 PATH 后直接 `iyp <子命令>`；也可
+`python3 /path/to/init_your_proj/iyp <子命令>`。
+
+- 本脚本用于从源码仓库直接运行（开发 / 未安装场景）；
+- 通过 `uv tool install` / `pipx install` / `pip install` 安装后，
+  由 console_scripts 生成的 iyp 启动器接管，无需本文件。
 """
 import os
 import sys
 
 _HERE = os.path.dirname(os.path.abspath(__file__))
-# iyp 位于工具仓库根（init_your_proj/iyp），仓库根就是 _HERE 所在目录
-_ROOT = _HERE
-os.environ.setdefault("IYP_HOME", _ROOT)
-for p in (_ROOT, os.path.join(_ROOT, "scripts")):
-    if p not in sys.path:
-        sys.path.insert(0, p)
-try:
-    from scripts.cli import main
-except ImportError:
-    from init_your_proj.cli import main  # 兼容旧目录名
+# 仓库根就是本文件所在目录；设置 IYP_HOME 让工具配置落到仓库根（源码模式语义）
+os.environ.setdefault("IYP_HOME", _HERE)
+if _HERE not in sys.path:
+    sys.path.insert(0, _HERE)
+
+from init_your_proj.cli import main
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv[1:]))

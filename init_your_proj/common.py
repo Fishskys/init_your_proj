@@ -17,7 +17,7 @@ CYAN = "\033[36m"
 DIM = "\033[2m"
 
 CONFIG_NAME = "init_your_proj.toml"
-PACKAGE_DIR = Path(__file__).resolve().parent          # .../init_your_proj/scripts
+PACKAGE_DIR = Path(__file__).resolve().parent          # .../init_your_proj（Python 包目录）
 # 工具仓库根：优先 IYP_HOME 环境变量（入口脚本设置），否则用包位置推导。
 # templates 与 init_your_proj.toml 都在这里；与用户项目目录无关。
 PROJECT_ROOT = Path(os.environ.get("IYP_HOME", "")) if os.environ.get("IYP_HOME") else PACKAGE_DIR.parent
