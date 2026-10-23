@@ -11,7 +11,7 @@
 - 🧠 **动态本机指纹**：运行时探测本机用户名、家目录、主机名、局域网 IP，生成精确匹配规则——换台机器依然有效，不会把文档里的举例误判成泄漏。
 - 🎯 **IP 白名单（CIDR）**：任意 IPv4 默认命中（公网也报）；回环/常见 DNS/探测到的本机 IP 在默认白名单，用户可追加（支持 `192.168.0.0/24` 网段）。
 - 📋 **白名单承载人工判定**：形状匹配的命中（如数据库连接串示例）改文字躲不开，正确做法是子串白名单；报告里写明了操作要点。
-- 📦 **零依赖零网络**：纯 Python 标准库，不访问任何外部服务，clone 到固定位置即可用；支持 [pre-commit](https://pre-commit.com) 框架集成。
+- 📦 **零依赖零网络**：纯 Python 标准库，不访问任何外部服务；`uv tool`/`pipx`/`pip` 一条命令安装即得 `iyp` 命令，支持 [pre-commit](https://pre-commit.com) 框架集成。
 
 ---
 
@@ -24,52 +24,35 @@
 
 ### 安装
 
-clone 到一个**固定位置**（任意你存放工具的目录），之后两种用法（见下节「使用方式」）：
+推荐**作为命令安装**（装完在任意终端、IDE、GUI Git 客户端里都能用 `iyp`）。任选其一：
 
 ```bash
-git clone <本仓库地址> /path/to/init_your_proj
+# 推荐：uv tool（隔离环境，生成 PATH 里的 iyp 启动器）
+uv tool install git+https://github.com/Fishskys/init_your_proj
+
+# 或 pipx（同样隔离）
+pipx install git+https://github.com/Fishskys/init_your_proj
+
+# 或 pip（装到当前 Python 环境）
+pip install --user git+https://github.com/Fishskys/init_your_proj
 ```
 
-## 🔧 使用方式（两种）
+> 需要 **Python 3.11+**（纯标准库，无第三方依赖）。
+> 安装产出的是 PATH 里一个真正的 `iyp` 命令（不是软链）——因此在 IDE / GUI Git 客户端 / 非交互 shell 里也能找到它，
+> 不会出现「终端里 `iyp` 正常、IDE 提交时却报 `Executable iyp not found`」。升级：`uv tool upgrade init-your-proj`
+> （或 `pipx upgrade init-your-proj` / `pip install -U`）。卸载：`uv tool uninstall init-your-proj`。
 
-### 方式一：绝对路径手动使用（不加环境变量）
+### 从源码直接运行（开发者）
 
-直接用工具的绝对路径调用，在哪都能跑：
+不安装、直接跑仓库里的入口（等价于安装后的 `iyp`）：
 
 ```bash
+git clone https://github.com/Fishskys/init_your_proj /path/to/init_your_proj
 /path/to/init_your_proj/iyp init /path/to/my-proj
 /path/to/init_your_proj/iyp check /path/to/my-proj
 ```
 
-### 方式二：加入环境变量（推荐，之后直接用 `iyp` 命令）
-
-**Linux / macOS：**
-
-用 `echo $SHELL` 查看当前 shell，把配置写进对应的 rc 文件（不确定就都写）：
-
-| Shell | 配置文件 | 写入方式 |
-| --- | --- | --- |
-| bash | `~/.bashrc` | `echo 'export PATH="/path/to/init_your_proj:$PATH"' >> ~/.bashrc` |
-| zsh | `~/.zshrc` | `echo 'export PATH="/path/to/init_your_proj:$PATH"' >> ~/.zshrc` |
-| fish | `~/.config/fish/config.fish` | `fish_add_path /path/to/init_your_proj` |
-
-写入后重开终端，或 `source` 对应文件生效。
-
-**Windows（PowerShell，当前会话）：**
-
-```powershell
-$env:PATH = "D:\tools\init_your_proj;$env:PATH"
-iyp init D:\projects\my-proj
-```
-
-**Windows（永久生效）：**
-
-```powershell
-# 方式 1：setx（当前用户，新开的终端生效）
-setx PATH "D:\tools\init_your_proj;$env:PATH"
-
-# 方式 2：图形界面——系统设置 → 高级系统设置 → 环境变量 → 用户变量 Path → 新建 → 填 D:\tools\init_your_proj
-```
+## 🔧 使用
 
 ### 用法一：手动使用
 
@@ -86,7 +69,7 @@ iyp check --stage .           # 提交前卡点：只查本次暂存文件
 ```yaml
 repos:
   - repo: https://github.com/Fishskys/init_your_proj
-    rev: v0.1.1                        # 使用最新发布 tag
+    rev: v0.2.0                        # 使用最新发布 tag
     hooks:
       - id: iyp-check
 ```
@@ -97,6 +80,12 @@ repos:
 pip install pre-commit      # 或 pipx install pre-commit / brew install pre-commit
 pre-commit install          # 在用户项目根执行，写入 .git/hooks/pre-commit
 ```
+
+> **前提：`iyp` 必须在 PATH 中**（本 hook 用 `language: system` 直接调用它）。
+> 先按上面「安装」把 iyp 装好（`uv tool install` / `pipx install`）。
+> ⚠️ pre-commit 钩子由 git 在**非交互 shell** 中执行，不读 `~/.bashrc` —— 只把仓库目录加进 `~/.bashrc` 的 PATH，
+> 在**终端**提交能用，但 **IDE / GUI Git 客户端**提交会报 `Executable iyp not found`。用 `uv tool`/`pipx`/`pip`
+> 装到 `~/.local/bin`（默认在系统 PATH 中）即可彻底避免此问题。
 
 之后每次 `git commit` 自动执行 `iyp check --stage --strict`，命中阻断级问题返回非零退出码让 Git 取消提交。手动全量跑一遍：`pre-commit run --all-files`。
 
@@ -198,7 +187,7 @@ whitelist_strings = [
 * [x] init / check 双子命令（check 四种扫描范围 + `--strict`/`--raw`）
 * [x] 动态本机指纹（用户名/路径/主机名/局域网 IP）
 * [x] 全量 IPv4 检测 + CIDR 白名单 + 脱敏示例过滤 + 二进制文件跳过
-* [x] PATH 安装（IYP_HOME）与 pre-commit 钩子集成
+* [x] 可作为命令安装（uv tool / pipx / pip，生成 PATH 里的 iyp）与 pre-commit 钩子集成
 * [x] 三层配置：内置默认 + 工具根本机 toml + 用户项目根增量 toml
 * [ ] 更多语言/框架的 .gitignore 段
 
