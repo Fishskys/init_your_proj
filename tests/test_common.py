@@ -169,6 +169,29 @@ class TestEnsureToolConfig(unittest.TestCase):
         # placeholder 已从配置项移除
         self.assertNotIn("placeholder", common.CONFIG_TEMPLATE)
 
+    def test_creates_missing_config_dir(self):
+        # XDG 配置目录不存在时必须自动创建父目录（安装态首次使用场景）
+        with tempfile.TemporaryDirectory() as d, tempfile.TemporaryDirectory() as fake_pkg:
+            old = {k: os.environ.get(k) for k in ("IYP_HOME", "XDG_CONFIG_HOME")}
+            os.environ.pop("IYP_HOME", None)
+            nested = Path(d) / "deep" / "cfg"
+            os.environ["XDG_CONFIG_HOME"] = str(nested)
+            from unittest import mock
+            try:
+                self.assertFalse(nested.exists())
+                # 伪造 PACKAGE_DIR，排除源码仓库根 legacy 配置的影响
+                with mock.patch.object(common, "PACKAGE_DIR", Path(fake_pkg)):
+                    path, created = common.ensure_tool_config()
+                self.assertTrue(created)
+                self.assertTrue(path.exists())
+                self.assertEqual(path.parent, nested / "init_your_proj")
+            finally:
+                for k, v in old.items():
+                    if v is None:
+                        os.environ.pop(k, None)
+                    else:
+                        os.environ[k] = v
+
 
 class TestToolConfigPathLocation(unittest.TestCase):
     """tool_config_path() 的落点优先级（保证安装态不写 site-packages、白名单不丢）。"""
